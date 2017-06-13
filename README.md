@@ -7,5 +7,5 @@ Stress-test a node.js filesystem watcher. Includes a CLI interface that can be u
 $ npm install
 
 # See the usage
-$ npm start --help
+$ npm start -- --help
 ```
