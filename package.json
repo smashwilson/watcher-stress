@@ -1,0 +1,20 @@
+{
+  "name": "watcher-stress",
+  "version": "1.0.0",
+  "description": "Stress-test the NSFW watcher",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "smashwilson@github.com",
+  "license": "MIT",
+  "dependencies": {
+    "colors": "^1.1.2",
+    "commander": "^2.9.0",
+    "human-format": "^0.8.0",
+    "mz": "^2.6.0",
+    "nsfw": "^1.0.15",
+    "temp": "^0.8.3"
+  }
+}
