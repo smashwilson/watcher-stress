@@ -22,6 +22,13 @@ program
 
 program.interval = program.interval || 10 * 60 * 1000
 
+// Ensure exactly one benchmarking action is specified
+const actionOptions = [program.cli, program.watchers].filter(option => option !== undefined).length
+if (actionOptions !== 1) {
+  console.error('You must specify exactly one of --cli or --watchers.')
+  program.help()
+}
+
 if (program.cli) {
   cli(program.cli, {
     debounce: program.debounce,
