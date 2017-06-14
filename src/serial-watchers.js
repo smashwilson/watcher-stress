@@ -4,8 +4,8 @@ const nsfw = require('nsfw')
 
 const {tempDir, randomTree, atRandom, reportUsage, reportError} = require('./helpers')
 
-module.exports = async function watchers (count) {
-  console.log('>> WATCHER STRESS TEST <<'.banner)
+module.exports = async function (count) {
+  console.log('>> SERIAL WATCHER STRESS TEST <<'.banner)
 
   const root = await tempDir('watcher-')
   const {directories} = await randomTree(root, 10000)

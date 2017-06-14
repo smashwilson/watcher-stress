@@ -2,7 +2,7 @@ const program = require('commander')
 const colors = require('colors')
 
 const cli = require('./cli')
-const watchers = require('./watcher')
+const serialWatchers = require('./serial-watchers')
 const {setResourceLogFile} = require('./helpers')
 
 colors.setTheme({
@@ -19,14 +19,14 @@ program
   .option('-i, --interval [ms]', 'interval to publish resource usage statistics', parseInt)
   .option('-r, --resource-log [path]', 'log resource usage to a JSON file')
   .option('-c, --cli [paths,]', 'CLI mode', str => str.split(','))
-  .option('-w, --watchers [count]', 'Exercise rapid watcher creation and destruction', parseInt)
+  .option('--serial-watchers [count]', 'Exercise rapid watcher creation and destruction', parseInt)
   .parse(process.argv)
 
 program.interval = program.interval || 10 * 60 * 1000
 setResourceLogFile(program.resourceLog)
 
 // Ensure exactly one benchmarking action is specified
-const actionOptions = [program.cli, program.watchers].filter(option => option !== undefined).length
+const actionOptions = [program.cli, program.serialWatchers].filter(option => option !== undefined).length
 if (actionOptions !== 1) {
   console.error('You must specify exactly one of --cli or --watchers.')
   program.help()
@@ -39,6 +39,6 @@ if (program.cli) {
   })
 }
 
-if (program.watchers) {
-  watchers(program.watchers)
+if (program.serialWatchers) {
+  serialWatchers(program.serialWatchers)
 }
