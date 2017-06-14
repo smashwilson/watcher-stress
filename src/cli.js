@@ -54,14 +54,24 @@ async function reportUsage (logFile) {
   const memUsage = process.memoryUsage()
   const uptime = process.uptime()
 
+  let memSummary = ''
+  if (memUsage.rss) {
+    memSummary += ' rss ' + humanBytes(memUsage.rss)
+  }
+  if (memUsage.heapTotal) {
+    memSummary += ' total heap ' + humanBytes(memUsage.heapTotal)
+  }
+  if (memUsage.heapUsed) {
+    memSummary += ' used heap ' + humanBytes(memUsage.heapUsed)
+  }
+  if (memUsage.external) {
+    memSummary += ' external ' + humanBytes(memUsage.external)
+  }
+
   console.log('\n>> RESOURCE USAGE <<'.banner)
   console.log('uptime'.header + ' ' + humanSeconds(uptime))
   console.log('CPU usage:'.header + ' ' + cpuUsage.user + ' user ' + cpuUsage.system + ' system')
-  console.log('RAM usage:'.header +
-    ' rss ' + humanBytes(memUsage.rss) +
-    ' total heap ' + humanBytes(memUsage.heapTotal) +
-    ' used heap ' + humanBytes(memUsage.heapUsed) +
-    ' external ' + humanBytes(memUsage.external))
+  console.log('RAM usage:'.header + memSummary)
 
   if (logFile) {
     const payload = {cpuUsage, uptime, memUsage}
