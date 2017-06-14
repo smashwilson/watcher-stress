@@ -2,7 +2,7 @@ const fs = require('mz/fs')
 const path = require('path')
 const nsfw = require('nsfw')
 
-const {tempDir, randomTree, atRandom, reportUsage} = require('./helpers')
+const {tempDir, randomTree, atRandom, reportUsage, reportError} = require('./helpers')
 
 module.exports = async function watchers (count) {
   console.log('>> WATCHER STRESS TEST <<'.banner)
@@ -25,7 +25,7 @@ async function runWatcher (i, directory) {
   const watcher = await nsfw(
     directory,
     events => { eventCount += events.length },
-    {debounceMS: 1}
+    {debounceMS: 1, errorCallback: reportError}
   )
   await watcher.start()
 
