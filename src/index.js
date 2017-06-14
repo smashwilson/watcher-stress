@@ -3,6 +3,7 @@ const colors = require('colors')
 
 const cli = require('./cli')
 const serialWatchers = require('./serial-watchers')
+const parallelWatchers = require('./parallel-watchers')
 const {setResourceLogFile} = require('./helpers')
 
 colors.setTheme({
@@ -20,15 +21,16 @@ program
   .option('-r, --resource-log [path]', 'log resource usage to a JSON file')
   .option('-c, --cli [paths,]', 'CLI mode', str => str.split(','))
   .option('--serial-watchers [count]', 'Exercise rapid watcher creation and destruction', parseInt)
+  .option('--parallel-watchers [count]', 'Exercise simultaneous watchers', parseInt)
   .parse(process.argv)
 
 program.interval = program.interval || 10 * 60 * 1000
 setResourceLogFile(program.resourceLog)
 
 // Ensure exactly one benchmarking action is specified
-const actionOptions = [program.cli, program.serialWatchers].filter(option => option !== undefined).length
+const actionOptions = [program.cli, program.serialWatchers, program.parallelWatchers].filter(option => option !== undefined).length
 if (actionOptions !== 1) {
-  console.error('You must specify exactly one of --cli or --watchers.')
+  console.error('You must specify exactly one of --cli, --serial-watchers or --parallel-watchers.')
   program.help()
 }
 
@@ -41,4 +43,8 @@ if (program.cli) {
 
 if (program.serialWatchers) {
   serialWatchers(program.serialWatchers)
+}
+
+if (program.parallelWatchers) {
+  parallelWatchers(program.parallelWatchers)
 }
