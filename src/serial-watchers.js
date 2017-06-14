@@ -7,7 +7,7 @@ const {tempDir, randomTree, atRandom, reportUsage, reportError} = require('./hel
 module.exports = async function (count) {
   console.log('>> SERIAL WATCHER STRESS TEST <<'.banner)
 
-  const root = await tempDir('watcher-')
+  const root = await tempDir('serial-')
   const {directories} = await randomTree(root, 10000)
 
   for (let i = 0; i < count; i++) {
