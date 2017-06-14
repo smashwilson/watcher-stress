@@ -2,6 +2,7 @@ const program = require('commander')
 const colors = require('colors')
 
 const cli = require('./cli')
+const watchers = require('./watcher')
 
 colors.setTheme({
   banner: ['bold', 'inverse'],
@@ -17,7 +18,7 @@ program
   .option('-i, --interval [ms]', 'interval to publish resource usage statistics', parseInt)
   .option('-r, --resource-log [path]', 'log resource usage to a JSON file')
   .option('-c, --cli [paths,]', 'CLI mode', str => str.split(','))
-  .option('-w, --watchers [count]', 'Watcher creation and destruction', parseInt)
+  .option('-w, --watchers [count]', 'Exercise rapid watcher creation and destruction', parseInt)
   .parse(process.argv)
 
 program.interval = program.interval || 10 * 60 * 1000
@@ -35,4 +36,8 @@ if (program.cli) {
     usageInterval: program.interval,
     resourceLog: program.resourceLog
   })
+}
+
+if (program.watchers) {
+  watchers(program.watchers)
 }

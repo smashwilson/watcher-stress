@@ -66,7 +66,16 @@ function humanBytes (bytes) {
   return humanFormat(bytes) + ` (${bytes}b)`.sidenote
 }
 
-exports.tempDir = tempDir
-exports.actionName = actionName
-exports.humanSeconds = humanSeconds
-exports.humanBytes = humanBytes
+function atRandom (array) {
+  const ind = Math.floor(Math.random() * array.length)
+  return array[ind]
+}
+
+module.exports = {
+  tempDir,
+  randomTree,
+  actionName,
+  humanSeconds,
+  humanBytes,
+  atRandom
+}
