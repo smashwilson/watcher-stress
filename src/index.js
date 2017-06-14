@@ -3,6 +3,7 @@ const colors = require('colors')
 
 const cli = require('./cli')
 const watchers = require('./watcher')
+const {setResourceLogFile} = require('./helpers')
 
 colors.setTheme({
   banner: ['bold', 'inverse'],
@@ -22,6 +23,7 @@ program
   .parse(process.argv)
 
 program.interval = program.interval || 10 * 60 * 1000
+setResourceLogFile(program.resourceLog)
 
 // Ensure exactly one benchmarking action is specified
 const actionOptions = [program.cli, program.watchers].filter(option => option !== undefined).length
@@ -33,8 +35,7 @@ if (actionOptions !== 1) {
 if (program.cli) {
   cli(program.cli, {
     debounce: program.debounce,
-    usageInterval: program.interval,
-    resourceLog: program.resourceLog
+    usageInterval: program.interval
   })
 }
 

@@ -71,11 +71,56 @@ function atRandom (array) {
   return array[ind]
 }
 
+function reportError (error) {
+  console.error('>> ERROR <<'.dangerBanner)
+  console.error(error.stack.danger)
+}
+
+let cpuUsage = null
+let resourceLogFile = null
+
+function setResourceLogFile (file) {
+  resourceLogFile = file
+}
+
+async function reportUsage () {
+  cpuUsage = process.cpuUsage(cpuUsage)
+  const memUsage = process.memoryUsage()
+  const uptime = process.uptime()
+
+  let memSummary = ''
+  if (memUsage.rss) {
+    memSummary += ' rss ' + humanBytes(memUsage.rss)
+  }
+  if (memUsage.heapTotal) {
+    memSummary += ' total heap ' + humanBytes(memUsage.heapTotal)
+  }
+  if (memUsage.heapUsed) {
+    memSummary += ' used heap ' + humanBytes(memUsage.heapUsed)
+  }
+  if (memUsage.external) {
+    memSummary += ' external ' + humanBytes(memUsage.external)
+  }
+
+  console.log('\n>> RESOURCE USAGE <<'.banner)
+  console.log('uptime'.header + ' ' + humanSeconds(uptime))
+  console.log('CPU usage:'.header + ' ' + cpuUsage.user + ' user ' + cpuUsage.system + ' system')
+  console.log('RAM usage:'.header + memSummary)
+
+  if (resourceLogFile) {
+    const payload = {cpuUsage, uptime, memUsage}
+    await fs.appendFile(resourceLogFile, JSON.stringify(payload) + '\n', {encoding: 'utf8'})
+  }
+}
+
 module.exports = {
   tempDir,
   randomTree,
   actionName,
   humanSeconds,
   humanBytes,
-  atRandom
+  atRandom,
+  reportError,
+  setResourceLogFile,
+  reportUsage
 }
