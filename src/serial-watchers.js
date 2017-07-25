@@ -1,10 +1,9 @@
 const fs = require('mz/fs')
 const path = require('path')
-const nsfw = require('nsfw')
 
 const {tempDir, randomTree, atRandom, reportUsage, reportError} = require('./helpers')
 
-module.exports = async function (count) {
+module.exports = async function (count, facade) {
   console.log('>> SERIAL WATCHER STRESS TEST <<'.banner)
 
   const root = await tempDir('serial-')
@@ -22,12 +21,16 @@ async function runWatcher (i, directory) {
 
   let eventCount = 0
 
-  const watcher = await nsfw(
+  const watcher = await facade.start(
     directory,
-    events => { eventCount += events.length },
-    {debounceMS: 1, errorCallback: reportError}
+    (err, events) => {
+      if (err) {
+        reportError(err)
+        return
+      }
+      eventCount += events.length
+    }
   )
-  await watcher.start()
 
   const entries = await fs.readdir(directory)
   const files = (await Promise.all(
