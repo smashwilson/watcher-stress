@@ -2,17 +2,17 @@ const sfw = require('sfw')
 const nsfw = require('nsfw')
 
 class SfwFacade {
-  async start(rootDir, callback) {
-    return await sfw.watch(rootDir, callback)
+  start (rootDir, callback) {
+    return sfw.watch(rootDir, callback)
   }
 
-  async stop(watcher) {
-    await watcher.unwatch()
+  stop (watcher) {
+    return watcher.unwatch()
   }
 }
 
 class NsfwFacade {
-  async start(rootDir, callback) {
+  async start (rootDir, callback) {
     const watcher = await nsfw(
       rootDir,
       events => { callback(null, events) },
@@ -22,8 +22,8 @@ class NsfwFacade {
     return watcher
   }
 
-  async stop(watcher) {
-    await watcher.stop()
+  stop (watcher) {
+    return watcher.stop()
   }
 }
 
