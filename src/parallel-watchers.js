@@ -1,5 +1,4 @@
 const fs = require('mz/fs')
-const nsfw = require('nsfw')
 const {tempDir, randomTree, atRandom, reportUsage, reportError} = require('./helpers')
 
 module.exports = async function (count) {
@@ -14,20 +13,19 @@ module.exports = async function (count) {
   for (let i = 0; i < count; i++) {
     const root = atRandom(directories)
     watcherStartPromises.push((async () => {
-      const watcher = await nsfw(
-        root,
-        events => { eventCounts[i] = (eventCounts[i] || 0) + events.length },
-        {
-          debounceMS: 1,
-          errorCallback: error => {
-            errors[i] = true
-            reportError(error)
-          }
-        }
-      )
-
       try {
-        await watcher.start()
+        const watcher = await facade.start(
+          root,
+          (err, events) => {
+            if (err) {
+              reportError(err)
+              return
+            }
+
+            eventCounts[i] = (eventCounts[i] || 0) + events.length
+          }
+        )
+
         console.log(`watcher #${i} started`.header + ` on ${root}`.sidenote)
         return watcher
       } catch (err) {
