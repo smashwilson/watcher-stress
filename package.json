@@ -1,7 +1,7 @@
 {
   "name": "watcher-stress",
   "version": "1.0.0",
-  "description": "Stress-test the NSFW watcher",
+  "description": "Stress-test filesystem watchers",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
