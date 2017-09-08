@@ -1,9 +1,9 @@
-const sfw = require('sfw')
+const watcher = require('@atom/watcher')
 const nsfw = require('nsfw')
 
-class SfwFacade {
+class WatcherFacade {
   start (rootDir, callback) {
-    return sfw.watch(rootDir, callback)
+    return watcher.watch(rootDir, callback)
   }
 
   stop (watcher) {
@@ -28,7 +28,7 @@ class NsfwFacade {
 }
 
 const FACADES = {
-  sfw: SfwFacade,
+  watcher: WatcherFacade,
   nsfw: NsfwFacade
 }
 
