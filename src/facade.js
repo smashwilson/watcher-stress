@@ -1,9 +1,11 @@
-const sfw = require('sfw')
+const path = require('path')
+
+const watcher = require('@atom/watcher')
 const nsfw = require('nsfw')
 
-class SfwFacade {
+class WatcherFacade {
   start (rootDir, callback) {
-    return sfw.watch(rootDir, callback)
+    return watcher.watch(rootDir, callback)
   }
 
   stop (watcher) {
@@ -11,11 +13,25 @@ class SfwFacade {
   }
 }
 
+const NSFW_ACTIONS = new Map([
+  [nsfw.actions.MODIFIED, 'modified'],
+  [nsfw.actions.CREATED, 'created'],
+  [nsfw.actions.DELETED, 'deleted'],
+  [nsfw.actions.RENAMED, 'renamed']
+])
+
 class NsfwFacade {
   async start (rootDir, callback) {
     const watcher = await nsfw(
       rootDir,
-      events => { callback(null, events) },
+      events => callback(null, events.map(event => {
+        return {
+          action: NSFW_ACTIONS.get(event.action) || `unknown ${event.action}`,
+          kind: 'unknown',
+          oldPath: event.oldFile ? path.join(event.directory, event.oldFile) : undefined,
+          path: path.join(event.directory, event.file || event.newFile)
+        }
+      })),
       {debounceMS: 1, errorCallback: err => { callback(err) } }
     )
     await watcher.start()
@@ -28,7 +44,7 @@ class NsfwFacade {
 }
 
 const FACADES = {
-  sfw: SfwFacade,
+  watcher: WatcherFacade,
   nsfw: NsfwFacade
 }
 

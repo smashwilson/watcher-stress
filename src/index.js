@@ -17,7 +17,7 @@ colors.setTheme({
 
 program
   .version('0.0.0')
-  .option('--use [impl]', 'use specified watcher implementation (sfw, nsfw)', /^(sfw|nsfw)$/i)
+  .option('--use [impl]', 'use specified watcher implementation (watcher, nsfw)', /^(watcher|nsfw)$/i)
   .option('-d, --debounce [ms]', 'configure debouncing interval', parseInt)
   .option('-i, --interval [ms]', 'interval to publish resource usage statistics', parseInt)
   .option('-r, --resource-log [path]', 'log resource usage to a JSON file')
