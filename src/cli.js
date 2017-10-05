@@ -12,6 +12,7 @@ module.exports = async function (roots, facade, opts) {
 
       return facade.start(
         realRoot,
+        {},
         (err, events) => {
           if (err) {
             reportError(err)

@@ -4,8 +4,8 @@ const watcher = require('@atom/watcher')
 const nsfw = require('nsfw')
 
 class WatcherFacade {
-  start (rootDir, callback) {
-    return watcher.watch(rootDir, callback)
+  start (rootDir, options, callback) {
+    return watcher.watch(rootDir, options, callback)
   }
 
   stop (watcher) {
@@ -21,7 +21,7 @@ const NSFW_ACTIONS = new Map([
 ])
 
 class NsfwFacade {
-  async start (rootDir, callback) {
+  async start (rootDir, options, callback) {
     const watcher = await nsfw(
       rootDir,
       events => callback(null, events.map(event => {

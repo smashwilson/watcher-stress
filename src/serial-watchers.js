@@ -23,6 +23,7 @@ async function runWatcher (i, directory) {
 
   const watcher = await facade.start(
     directory,
+    {},
     (err, events) => {
       if (err) {
         reportError(err)

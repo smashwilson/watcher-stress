@@ -16,6 +16,7 @@ module.exports = async function (count, facade) {
       try {
         const watcher = await facade.start(
           root,
+          {},
           (err, events) => {
             if (err) {
               reportError(err)
