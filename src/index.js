@@ -19,7 +19,7 @@ colors.setTheme({
 
 program
   .version('0.0.0')
-  .option('--use [impl]', 'use specified watcher implementation (watcher, nsfw)', /^(watcher|nsfw)$/i)
+  .option('--use [impl]', 'use specified watcher implementation (watcher [default], nsfw)', /^(watcher|nsfw)$/i)
   .option('--poll', 'force polling mode for watcher')
   .option('-d, --debounce [ms]', 'configure debouncing interval', parseInt)
   .option('-i, --interval [ms]', 'interval to publish resource usage statistics', parseInt)

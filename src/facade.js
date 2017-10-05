@@ -48,7 +48,7 @@ const FACADES = {
   nsfw: NsfwFacade
 }
 
-exports.createFacade = function (implName) {
+exports.createFacade = function (implName = 'watcher') {
   const Constructor = FACADES[implName]
   if (!Constructor) {
     throw new Error(`Unrecognized watcher implementation: ${implName}`)
