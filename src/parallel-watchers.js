@@ -1,7 +1,7 @@
 const fs = require('mz/fs')
 const {tempDir, randomTree, atRandom, reportUsage, reportError} = require('./helpers')
 
-module.exports = async function (count, facade) {
+module.exports = async function (facade, opts) {
   console.log('>> PARALLEL WATCHER STRESS TEST <<'.banner)
 
   const root = await tempDir('parallel-')
@@ -10,7 +10,7 @@ module.exports = async function (count, facade) {
   const watcherStartPromises = []
   const eventCounts = []
   const errors = []
-  for (let i = 0; i < count; i++) {
+  for (let i = 0; i < opts.count; i++) {
     const root = atRandom(directories)
     watcherStartPromises.push((async () => {
       try {

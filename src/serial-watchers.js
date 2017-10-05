@@ -3,27 +3,27 @@ const path = require('path')
 
 const {tempDir, randomTree, atRandom, reportUsage, reportError} = require('./helpers')
 
-module.exports = async function (count, facade) {
+module.exports = async function (facade, opts) {
   console.log('>> SERIAL WATCHER STRESS TEST <<'.banner)
 
   const root = await tempDir('serial-')
   const {directories} = await randomTree(root, 10000)
 
-  for (let i = 0; i < count; i++) {
-    await runWatcher(i, atRandom(directories))
+  for (let i = 0; i < opts.count; i++) {
+    await runWatcher(i, opts, atRandom(directories))
   }
 
   await reportUsage()
 }
 
-async function runWatcher (i, directory) {
+async function runWatcher (i, opts, directory) {
   console.log(`starting watcher #${i}`.header + ` on ${path.basename(directory)}`.sidenote)
 
   let eventCount = 0
 
   const watcher = await facade.start(
     directory,
-    {},
+    {poll: opts.poll},
     (err, events) => {
       if (err) {
         reportError(err)

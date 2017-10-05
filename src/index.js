@@ -18,12 +18,13 @@ colors.setTheme({
 program
   .version('0.0.0')
   .option('--use [impl]', 'use specified watcher implementation (watcher, nsfw)', /^(watcher|nsfw)$/i)
+  .option('--poll', 'force polling mode for watcher')
   .option('-d, --debounce [ms]', 'configure debouncing interval', parseInt)
   .option('-i, --interval [ms]', 'interval to publish resource usage statistics', parseInt)
   .option('-r, --resource-log [path]', 'log resource usage to a JSON file')
   .option('-c, --cli [paths,]', 'CLI mode', str => str.split(','))
-  .option('--serial-watchers [count]', 'Exercise rapid watcher creation and destruction', parseInt)
-  .option('--parallel-watchers [count]', 'Exercise simultaneous watchers', parseInt)
+  .option('-e, --exercise [exercise]', 'Choose an exercise to perform (serial, parallel)', /^(serial|parallel)$/)
+  .option('--watcher-count [count]', 'Configure the number of watchers for an exercise (default: 1000)', parseInt)
   .parse(process.argv)
 
 program.interval = program.interval || 10 * 60 * 1000
@@ -33,23 +34,30 @@ setResourceLogFile(program.resourceLog)
 const facade = createFacade(program.use)
 
 // Ensure exactly one benchmarking action is specified
-const actionOptions = [program.cli, program.serialWatchers, program.parallelWatchers].filter(option => option !== undefined).length
+const actionOptions = [program.cli, program.exercise].filter(option => option !== undefined).length
 if (actionOptions !== 1) {
-  console.error('You must specify exactly one of --cli, --serial-watchers or --parallel-watchers.')
+  console.error('You must specify exactly one of --cli or --exercise.')
   program.help()
 }
 
 if (program.cli) {
   cli(program.cli, facade, {
     debounce: program.debounce,
-    usageInterval: program.interval
+    usageInterval: program.interval,
+    poll: program.poll
   })
 }
 
-if (program.serialWatchers) {
-  serialWatchers(program.serialWatchers, facade)
+if (program.exercise === 'serial') {
+  serialWatchers(facade, {
+    poll: program.poll,
+    count: program.watcherCount
+  })
 }
 
-if (program.parallelWatchers) {
-  parallelWatchers(program.parallelWatchers, facade)
+if (program.exercise === 'parallel') {
+  parallelWatchers(facade, {
+    poll: program.poll,
+    count: program.watcherCount
+  })
 }

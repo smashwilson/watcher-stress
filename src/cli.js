@@ -12,7 +12,7 @@ module.exports = async function (roots, facade, opts) {
 
       return facade.start(
         realRoot,
-        {},
+        {poll: opts.poll},
         (err, events) => {
           if (err) {
             reportError(err)
