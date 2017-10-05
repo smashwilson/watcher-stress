@@ -58,6 +58,8 @@ module.exports = async function (facade, opts) {
 
   await new Promise(resolve => setTimeout(resolve, 1000))
 
+  console.log(`\n>> STOPPING WATCHERS <<`.banner)
+
   const watcherStopPromises = []
   for (let k = 0; k < watchers.length; k++) {
     watcherStopPromises.push((async () => {
