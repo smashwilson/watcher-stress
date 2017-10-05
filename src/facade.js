@@ -3,8 +3,15 @@ const path = require('path')
 const watcher = require('@atom/watcher')
 const nsfw = require('nsfw')
 
+const init = watcher.configure({
+  mainLog: path.join(process.cwd(), 'main.log'),
+  workerLog: path.join(process.cwd(), 'worker.log'),
+  pollingLog: path.join(process.cwd(), 'polling.log')
+})
+
 class WatcherFacade {
   async start (rootDir, options, callback) {
+    await init
     const w = await watcher.watch(rootDir, options, callback)
     return {
       stop: w.unwatch.bind(w)
