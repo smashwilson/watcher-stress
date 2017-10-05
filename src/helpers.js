@@ -1,4 +1,3 @@
-const path = require('path')
 const temp = require('temp').track()
 const humanFormat = require('human-format')
 const nsfw = require('nsfw')
@@ -16,27 +15,6 @@ function tempDir (prefix) {
       resolve(dirPath)
     })
   })
-}
-
-async function randomTree (initialRoot, entries) {
-  const roots = [initialRoot]
-  const files = []
-
-  for (let i = 0; i < entries; i++) {
-    const root = roots[Math.floor(Math.random() * roots.length)]
-
-    if (Math.random() < 0.05) {
-      const dName = path.join(root, `d-${i}`)
-      await fs.mkdir(dName, 0o770)
-      roots.push(dName)
-    } else {
-      const fName = path.join(root, `f-${i}.txt`)
-      await fs.writeFile(fName, '\n', {encoding: 'utf8'})
-      files.push(fName)
-    }
-  }
-
-  return {directories: roots, files}
 }
 
 const actionNames = new Map([
@@ -115,7 +93,6 @@ async function reportUsage () {
 
 module.exports = {
   tempDir,
-  randomTree,
   actionName,
   humanSeconds,
   humanBytes,

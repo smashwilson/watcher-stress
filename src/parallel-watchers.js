@@ -1,17 +1,24 @@
 const fs = require('mz/fs')
-const {tempDir, randomTree, atRandom, reportUsage, reportError} = require('./helpers')
+const {atRandom, reportUsage, reportError} = require('./helpers')
+const {createTree} = require('./random-fs')
 
 module.exports = async function (facade, opts) {
   console.log('>> PARALLEL WATCHER STRESS TEST <<'.banner)
 
-  const root = await tempDir('parallel-')
-  const {files, directories} = await randomTree(root, 10000)
-
   const watcherStartPromises = []
   const eventCounts = []
   const errors = []
+  const trees = []
+
   for (let i = 0; i < opts.count; i++) {
-    const root = atRandom(directories)
+    const tree = await createTree({
+      prefix: 'parallel-',
+      directoryCount: 100,
+      fileCount: 1000
+    })
+    trees.push(tree)
+    const root = tree.getRoot()
+
     watcherStartPromises.push((async () => {
       try {
         const watcher = await facade.start(
@@ -45,7 +52,7 @@ module.exports = async function (facade, opts) {
   // Synthesize some filesystem events
   console.log(`\n>> CREATING FILESYSTEM EVENTS <<`.banner)
   for (let j = 0; j < 1000; j++) {
-    const someFile = atRandom(files)
+    const someFile = atRandom(trees).randomFile()
     await fs.appendFile(someFile, `eh ${j}\n`, {encoding: 'utf8'})
   }
 

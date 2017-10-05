@@ -1,22 +1,26 @@
 const fs = require('mz/fs')
 const path = require('path')
 
-const {tempDir, randomTree, atRandom, reportUsage, reportError} = require('./helpers')
+const {atRandom, reportUsage, reportError} = require('./helpers')
+const {createTree} = require('./random-fs')
 
 module.exports = async function (facade, opts) {
   console.log('>> SERIAL WATCHER STRESS TEST <<'.banner)
 
-  const root = await tempDir('serial-')
-  const {directories} = await randomTree(root, 10000)
+  const tree = await createTree({
+    prefix: 'serial-',
+    directoryCount: 1000,
+    fileCount: 10000
+  })
 
   for (let i = 0; i < opts.count; i++) {
-    await runWatcher(i, opts, atRandom(directories))
+    await runWatcher(facade, i, opts, tree.randomDirectory())
   }
 
   await reportUsage()
 }
 
-async function runWatcher (i, opts, directory) {
+async function runWatcher (facade, i, opts, directory) {
   console.log(`starting watcher #${i}`.header + ` on ${path.basename(directory)}`.sidenote)
 
   let eventCount = 0
