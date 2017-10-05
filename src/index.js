@@ -7,7 +7,7 @@ const cli = require('./cli')
 const {createFacade} = require('./facade')
 const serialWatchers = require('./serial-watchers')
 const parallelWatchers = require('./parallel-watchers')
-const {setResourceLogFile} = require('./helpers')
+const {setResourceLogFile, reportError} = require('./helpers')
 
 colors.setTheme({
   banner: ['bold', 'inverse'],
@@ -50,16 +50,26 @@ if (program.cli) {
   })
 }
 
+function endAfter (promise) {
+  return promise.then(
+    () => process.exit(0),
+    err => {
+      reportError(err)
+      process.exit(1)
+    }
+  )
+}
+
 if (program.exercise === 'serial') {
-  serialWatchers(facade, {
+  endAfter(serialWatchers(facade, {
     poll: program.poll,
     count: program.watcherCount
-  })
+  }))
 }
 
 if (program.exercise === 'parallel') {
-  parallelWatchers(facade, {
+  endAfter(parallelWatchers(facade, {
     poll: program.poll,
     count: program.watcherCount
-  })
+  }))
 }
