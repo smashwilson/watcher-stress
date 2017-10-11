@@ -8,7 +8,7 @@ class Tree {
     this.directoryChance = opts.directoryChance || 0.05
 
     this.id = 0
-    this.root = null
+    this.root = opts.root
 
     this.directories = []
     this.files = []
@@ -47,7 +47,10 @@ class Tree {
   }
 
   async generate (opts) {
-    this.root = await tempDir(this.prefix)
+    if (!this.root) {
+      this.root = await tempDir(this.prefix)
+    }
+
     this.directories.push(this.root)
 
     let directoriesRemaining = opts.directoryCount || 100
