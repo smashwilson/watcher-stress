@@ -22,6 +22,8 @@ program
   .version('0.0.0')
   .option('--use [impl]', 'use specified watcher implementation (watcher [default], nsfw)', /^(watcher|nsfw)$/i)
   .option('--poll', 'force polling mode for watcher')
+  .option('--polling-interval [ms]', 'milliseconds between polling cycles', parseInt)
+  .option('--polling-throttle [count]', 'number of system calls to perform each cycle', parseInt)
   .option('-d, --debounce [ms]', 'configure debouncing interval', parseInt)
   .option('-i, --interval [ms]', 'interval to publish resource usage statistics', parseInt)
   .option('-r, --resource-log [path]', 'log resource usage to a JSON file')
@@ -47,6 +49,45 @@ if (actionOptions !== 1) {
   program.help()
 }
 
+async function main () {
+  try {
+    await facade.init({
+      loggingDir: program.loggingDir,
+      pollingInterval: program.pollingInterval,
+      pollingThrottle: program.pollingThrottle
+    })
+
+    if (program.cli) {
+      cli(program.cli, facade, {
+        debounce: program.debounce,
+        usageInterval: program.interval,
+        poll: program.poll
+      })
+    } else if (program.gen) {
+      await gen(program.gen, {
+        dirChance: program.dirChance || 0.05,
+        dirCount: program.dirCount || 10,
+        fileCount: program.fileCount || 200
+      })
+    } else if (program.exercise === 'serial') {
+      await serialWatchers(facade, {
+        poll: program.poll,
+        count: program.watcherCount || 1000
+      })
+    } else if (program.exercise === 'parallel') {
+      await parallelWatchers(facade, {
+        poll: program.poll,
+        count: program.watcherCount || 1000
+      })
+    }
+
+    process.exit(0)
+  } catch (err) {
+    reportError(err)
+    process.exit(1)
+  }
+}
+
 if (program.cli) {
   cli(program.cli, facade, {
     debounce: program.debounce,
@@ -55,34 +96,4 @@ if (program.cli) {
   })
 }
 
-function endAfter (promise) {
-  return promise.then(
-    () => process.exit(0),
-    err => {
-      reportError(err)
-      process.exit(1)
-    }
-  )
-}
-
-if (program.gen) {
-  endAfter(gen(program.gen, {
-    dirChance: program.dirChance || 0.05,
-    dirCount: program.dirCount || 10,
-    fileCount: program.fileCount || 200
-  }))
-}
-
-if (program.exercise === 'serial') {
-  endAfter(serialWatchers(facade, {
-    poll: program.poll,
-    count: program.watcherCount || 1000
-  }))
-}
-
-if (program.exercise === 'parallel') {
-  endAfter(parallelWatchers(facade, {
-    poll: program.poll,
-    count: program.watcherCount || 1000
-  }))
-}
+main()
