@@ -76,13 +76,13 @@ if (program.gen) {
 if (program.exercise === 'serial') {
   endAfter(serialWatchers(facade, {
     poll: program.poll,
-    count: program.watcherCount
+    count: program.watcherCount || 1000
   }))
 }
 
 if (program.exercise === 'parallel') {
   endAfter(parallelWatchers(facade, {
     poll: program.poll,
-    count: program.watcherCount
+    count: program.watcherCount || 1000
   }))
 }
