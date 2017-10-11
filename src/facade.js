@@ -3,15 +3,30 @@ const path = require('path')
 const watcher = require('@atom/watcher')
 const nsfw = require('nsfw')
 
-const init = watcher.configure({
-  mainLog: path.join(process.cwd(), 'main.log'),
-  workerLog: path.join(process.cwd(), 'worker.log'),
-  pollingLog: path.join(process.cwd(), 'polling.log')
-})
-
 class WatcherFacade {
+  init (options) {
+    const loggingDir = options.loggingDir || process.cwd()
+
+    const opts = {}
+
+    if (loggingDir) {
+      opts.mainLog = path.join(loggingDir, 'main.log')
+      opts.workerLog = path.join(loggingDir, 'worker.log')
+      opts.pollingLog = path.join(loggingDir, 'polling.log')
+    }
+
+    if (options.pollingInterval) {
+      opts.pollingInterval = options.pollingInterval
+    }
+
+    if (options.pollingThrottle) {
+      opts.pollingThrottle = options.pollingThrottle
+    }
+
+    return watcher.configure(opts)
+  }
+
   async start (rootDir, options, callback) {
-    await init
     const w = await watcher.watch(rootDir, options, callback)
     return {
       stop: w.unwatch.bind(w)
@@ -27,6 +42,10 @@ const NSFW_ACTIONS = new Map([
 ])
 
 class NsfwFacade {
+  init () {
+    return Promise.resolve()
+  }
+
   async start (rootDir, options, callback) {
     const w = await nsfw(
       rootDir,
