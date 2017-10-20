@@ -27,9 +27,10 @@ class WatcherFacade {
   }
 
   async start (rootDir, options, callback) {
-    const w = await watcher.watch(rootDir, options, callback)
+    const w = await watcher.watchPath(rootDir, options, events => callback(null, events))
+    w.onDidError(err => callback(err))
     return {
-      stop: w.unwatch.bind(w)
+      stop: w.dispose.bind(w)
     }
   }
 }

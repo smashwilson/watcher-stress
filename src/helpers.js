@@ -51,7 +51,7 @@ function atRandom (array) {
 
 function reportError (error) {
   console.error('>> ERROR <<'.dangerBanner)
-  console.error(error.stack.danger)
+  console.error((error.stack || error.message).danger)
 }
 
 let cpuUsage = null
