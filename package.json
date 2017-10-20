@@ -1,15 +1,15 @@
 {
-  "name": "watcher-stress",
+  "name": "@smashwilson/watcher-stress",
   "version": "1.0.0",
   "description": "Stress-test filesystem watchers",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "test": "echo \"Tests? We don't need no stinking tests\" && exit 1",
     "build": "babel src -d build",
     "start": "npm run build && node build/index.js"
   },
   "bin": {
-    "watcher-stress": "./index.js"
+    "watcher-stress": "./build/index.js"
   },
   "keywords": [],
   "author": "smashwilson@github.com",
