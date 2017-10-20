@@ -5,7 +5,7 @@ const nsfw = require('nsfw')
 
 class WatcherFacade {
   init (options) {
-    const loggingDir = options.loggingDir || process.cwd()
+    const loggingDir = options.loggingDir
 
     const opts = {}
 

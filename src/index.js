@@ -21,6 +21,7 @@ colors.setTheme({
 program
   .version(require('../package.json').version)
   .option('--use [impl]', 'use specified watcher implementation (watcher [default], nsfw)', /^(watcher|nsfw)$/i)
+  .option('--logging-dir [path]', 'produce diagnostic logging to files within a directory')
   .option('--poll', 'force polling mode for watcher')
   .option('--polling-interval [ms]', 'milliseconds between polling cycles', parseInt)
   .option('--polling-throttle [count]', 'number of system calls to perform each cycle', parseInt)
