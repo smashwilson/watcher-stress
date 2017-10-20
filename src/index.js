@@ -58,7 +58,7 @@ async function main () {
     })
 
     if (program.cli) {
-      cli(program.cli, facade, {
+      await cli(program.cli, facade, {
         debounce: program.debounce,
         usageInterval: program.interval,
         poll: program.poll
@@ -86,14 +86,6 @@ async function main () {
     reportError(err)
     process.exit(1)
   }
-}
-
-if (program.cli) {
-  cli(program.cli, facade, {
-    debounce: program.debounce,
-    usageInterval: program.interval,
-    poll: program.poll
-  })
 }
 
 main()

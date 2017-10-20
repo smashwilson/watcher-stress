@@ -1,11 +1,10 @@
-const path = require('path')
 const fs = require('mz/fs')
 
-const {actionName, reportError, reportUsage} = require('./helpers')
+const {reportError, reportUsage} = require('./helpers')
 
 module.exports = async function (roots, facade, opts) {
   const realRoots = []
-  const watchers = await Promise.all(
+  await Promise.all(
     roots.map(async root => {
       const realRoot = await fs.realpath(root)
       realRoots.push(realRoot)
@@ -29,6 +28,8 @@ module.exports = async function (roots, facade, opts) {
   console.log(` on paths ${realRoots.join(' ')}`.sidenote)
 
   setInterval(reportUsage, opts.usageInterval)
+
+  return new Promise(resolve => {})
 }
 
 function reportEvents (events) {
