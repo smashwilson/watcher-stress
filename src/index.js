@@ -19,7 +19,7 @@ colors.setTheme({
 })
 
 program
-  .version('0.0.0')
+  .version(require('../package.json').version)
   .option('--use [impl]', 'use specified watcher implementation (watcher [default], nsfw)', /^(watcher|nsfw)$/i)
   .option('--poll', 'force polling mode for watcher')
   .option('--polling-interval [ms]', 'milliseconds between polling cycles', parseInt)
