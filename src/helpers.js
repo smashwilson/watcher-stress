@@ -1,8 +1,22 @@
 const temp = require('temp').track()
 const humanFormat = require('human-format')
-const nsfw = require('nsfw')
 const fs = require('mz/fs')
-const {CREATED, DELETED, MODIFIED, RENAMED} = nsfw.actions
+
+let nsfw = null
+let CREATED = 'created'
+let DELETED = 'deleted'
+let MODIFIED = 'modified'
+let RENAMED = 'renamed'
+try {
+  nsfw = require('nsfw')
+
+  CREATED = nsfw.actions.CREATED
+  DELETED = nsfw.actions.DELETED
+  MODIFIED = nsfw.actions.MODIFIED
+  RENAMED = nsfw.actions.RENAMED
+} catch (err) {
+  //
+}
 
 function tempDir (prefix) {
   return new Promise((resolve, reject) => {

@@ -1,7 +1,12 @@
 const path = require('path')
 
 const watcher = require('@atom/watcher')
-const nsfw = require('nsfw')
+let nsfw = null
+try {
+  nsfw = require('nsfw')
+} catch (err) {
+  //
+}
 
 class WatcherFacade {
   init (options) {
@@ -67,9 +72,10 @@ class NsfwFacade {
   }
 }
 
-const FACADES = {
-  watcher: WatcherFacade,
-  nsfw: NsfwFacade
+const FACADES = {watcher: WatcherFacade}
+
+if (nsfw) {
+  FACADES.nsfw = NsfwFacade
 }
 
 exports.createFacade = function (implName = 'watcher') {
