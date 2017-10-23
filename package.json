@@ -16,7 +16,7 @@
   "author": "smashwilson@github.com",
   "license": "MIT",
   "dependencies": {
-    "@atom/watcher": "^0.0.2",
+    "@atom/watcher": ">=0.0.4",
     "colors": "^1.1.2",
     "commander": "^2.9.0",
     "human-format": "^0.8.0",
