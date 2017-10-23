@@ -1,7 +1,14 @@
 const path = require('path')
 
 const watcher = require('@atom/watcher')
-let nsfw = null
+let nsfw = {
+  actions: {
+    CREATED: 'created',
+    MODIFIED: 'modified',
+    DELETED: 'deleted',
+    RENAMED: 'renamed'
+  }
+}
 try {
   nsfw = require('nsfw')
 } catch (err) {
