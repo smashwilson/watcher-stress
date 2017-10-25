@@ -25,6 +25,7 @@ program
   .version(require('../package.json').version)
   .option('--use [impl]', `use specified watcher implementation (${watcherNames})`, watcherRx)
   .option('--logging-dir [path]', '(watcher only) produce diagnostic logging to files within a directory')
+  .option('--log-main-stdout', '(watcher only) log main thread activity directly to stdout')
   .option('--log-worker-stdout', '(watcher only) log worker thread activity directly to stdout')
   .option('--log-polling-stdout', '(watcher only) log polling thread activity directly to stdout')
   .option('--poll', '(watcher only) force polling mode')
@@ -59,6 +60,9 @@ async function main () {
   try {
     await facade.init({
       loggingDir: program.loggingDir,
+      logMainStdout: program.logMainStdout,
+      logWorkerStdout: program.logWorkerStdout,
+      logPollingStdout: program.logPollingStdout,
       pollingInterval: program.pollingInterval,
       pollingThrottle: program.pollingThrottle
     })
