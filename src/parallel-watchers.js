@@ -12,6 +12,7 @@ module.exports = async function (facade, opts) {
 
   for (let i = 0; i < opts.count; i++) {
     const tree = await createTree({
+      root: opts.root,
       prefix: 'parallel-',
       directoryCount: 100,
       fileCount: 1000

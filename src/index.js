@@ -79,6 +79,7 @@ async function main () {
 
     if (program.cli) {
       await cli(program.cli, facade, {
+        root: program.root,
         debounce: program.debounce,
         usageInterval: program.interval,
         poll: program.poll
@@ -91,11 +92,13 @@ async function main () {
       })
     } else if (program.exercise === 'serial') {
       await serialWatchers(facade, {
+        root: program.root,
         poll: program.poll,
         count: program.watcherCount || 1000
       })
     } else if (program.exercise === 'parallel') {
       await parallelWatchers(facade, {
+        root: program.root,
         poll: program.poll,
         count: program.watcherCount || 1000
       })
