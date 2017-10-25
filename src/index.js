@@ -57,6 +57,15 @@ if (actionOptions !== 1) {
   program.help()
 }
 
+if (program.gen === true) {
+  if (!program.root) {
+    console.error('--gen requires a path or a --root.')
+    program.help()
+  }
+
+  program.gen = program.root
+}
+
 async function main () {
   try {
     await facade.init({
