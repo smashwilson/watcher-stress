@@ -92,3 +92,7 @@ exports.createFacade = function (implName = 'watcher') {
   }
   return new Constructor()
 }
+
+exports.available = function () {
+  return Object.keys(FACADES)
+}

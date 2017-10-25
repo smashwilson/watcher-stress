@@ -4,7 +4,7 @@ const program = require('commander')
 const colors = require('colors')
 
 const cli = require('./cli')
-const {createFacade} = require('./facade')
+const {createFacade, available} = require('./facade')
 const serialWatchers = require('./serial-watchers')
 const parallelWatchers = require('./parallel-watchers')
 const gen = require('./gen')
@@ -18,9 +18,12 @@ colors.setTheme({
   danger: ['red', 'bold']
 })
 
+const watcherNames = available().join(', ')
+const watcherRx = new RegExp('^(' + available().join('|') + ')$', 'i')
+
 program
   .version(require('../package.json').version)
-  .option('--use [impl]', 'use specified watcher implementation (watcher [default], nsfw)', /^(watcher|nsfw)$/i)
+  .option('--use [impl]', `use specified watcher implementation (${watcherNames})`, watcherRx)
   .option('--logging-dir [path]', '(watcher only) produce diagnostic logging to files within a directory')
   .option('--log-worker-stdout', '(watcher only) log worker thread activity directly to stdout')
   .option('--log-polling-stdout', '(watcher only) log polling thread activity directly to stdout')
