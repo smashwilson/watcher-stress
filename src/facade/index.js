@@ -14,5 +14,5 @@ exports.createFacade = function (implName = 'watcher') {
 }
 
 exports.available = function () {
-  return Object.keys(facades)
+  return facades.keys()
 }
