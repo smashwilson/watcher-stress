@@ -1,7 +1,9 @@
-const facades = new Map(['./nsfw', './watcher'].map(file => {
-  const required = require(file)
-  return [required.name, required.Constructor]
-}))
+const facades = new Map(
+  ['./nsfw', './watcher']
+    .map(file => require(file))
+    .filter(impl => impl.Constructor.isLoaded())
+    .map(impl => [impl.name, impl.Constructor])
+)
 
 exports.createFacade = function (implName = 'watcher') {
   const Constructor = facades.get(implName)
