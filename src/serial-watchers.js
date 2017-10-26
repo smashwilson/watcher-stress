@@ -1,4 +1,4 @@
-const fs = require('mz/fs')
+const fs = require('fs-extra')
 const path = require('path')
 
 const {atRandom, reportUsage, reportError} = require('./helpers')
@@ -8,6 +8,7 @@ module.exports = async function (facade, opts) {
   console.log('>> SERIAL WATCHER STRESS TEST <<'.banner)
 
   const tree = await createTree({
+    root: opts.root,
     prefix: 'serial-',
     directoryCount: 1000,
     fileCount: 10000

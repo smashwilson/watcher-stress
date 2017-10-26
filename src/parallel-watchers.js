@@ -1,4 +1,5 @@
-const fs = require('mz/fs')
+const fs = require('fs-extra')
+const path = require('path')
 const {atRandom, reportUsage, reportError} = require('./helpers')
 const {createTree} = require('./random-fs')
 
@@ -10,8 +11,14 @@ module.exports = async function (facade, opts) {
   const errors = []
   const trees = []
 
+  function rootNumber (i) {
+    if (!opts.root) return null
+    return path.join(opts.root, `root-${i}`)
+  }
+
   for (let i = 0; i < opts.count; i++) {
     const tree = await createTree({
+      root: rootNumber(i),
       prefix: 'parallel-',
       directoryCount: 100,
       fileCount: 1000

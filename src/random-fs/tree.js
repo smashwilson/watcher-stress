@@ -1,5 +1,5 @@
 const path = require('path')
-const fs = require('mz/fs')
+const fs = require('fs-extra')
 const {atRandom, tempDir} = require('../helpers')
 
 class Tree {
@@ -47,7 +47,9 @@ class Tree {
   }
 
   async generate (opts) {
-    if (!this.root) {
+    if (this.root) {
+      await fs.mkdirs(this.root)
+    } else {
       this.root = await tempDir(this.prefix)
     }
 

@@ -27,6 +27,18 @@ class WatcherFacade {
       opts.pollingLog = path.join(loggingDir, 'polling.log')
     }
 
+    if (options.logMainStdout) {
+      opts.mainLog = watcher.STDOUT
+    }
+
+    if (options.logWorkerStdout) {
+      opts.workerLog = watcher.STDOUT
+    }
+
+    if (options.logPollingStdout) {
+      opts.pollingLog = watcher.STDOUT
+    }
+
     if (options.pollingInterval) {
       opts.pollingInterval = options.pollingInterval
     }
@@ -91,4 +103,8 @@ exports.createFacade = function (implName = 'watcher') {
     throw new Error(`Unrecognized watcher implementation: ${implName}`)
   }
   return new Constructor()
+}
+
+exports.available = function () {
+  return Object.keys(FACADES)
 }

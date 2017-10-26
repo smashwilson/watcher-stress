@@ -4,7 +4,7 @@ const program = require('commander')
 const colors = require('colors')
 
 const cli = require('./cli')
-const {createFacade} = require('./facade')
+const {createFacade, available} = require('./facade')
 const serialWatchers = require('./serial-watchers')
 const parallelWatchers = require('./parallel-watchers')
 const gen = require('./gen')
@@ -18,23 +18,30 @@ colors.setTheme({
   danger: ['red', 'bold']
 })
 
+const watcherNames = available().join(', ')
+const watcherRx = new RegExp('^(' + available().join('|') + ')$', 'i')
+
 program
   .version(require('../package.json').version)
-  .option('--use [impl]', 'use specified watcher implementation (watcher [default], nsfw)', /^(watcher|nsfw)$/i)
-  .option('--logging-dir [path]', 'produce diagnostic logging to files within a directory')
-  .option('--poll', 'force polling mode for watcher')
-  .option('--polling-interval [ms]', 'milliseconds between polling cycles', parseInt)
-  .option('--polling-throttle [count]', 'number of system calls to perform each cycle', parseInt)
-  .option('-d, --debounce [ms]', 'configure debouncing interval', parseInt)
-  .option('-i, --interval [ms]', 'interval to publish resource usage statistics', parseInt)
-  .option('-r, --resource-log [path]', 'log resource usage to a JSON file')
-  .option('-c, --cli [paths,]', 'CLI mode', str => str.split(','))
-  .option('-e, --exercise [exercise]', 'choose an exercise to perform (serial, parallel)', /^(serial|parallel)$/)
+  .option('--use <impl>', `use specified watcher implementation (${watcherNames})`, watcherRx)
+  .option('--logging-dir <path>', '(watcher only) produce diagnostic logging to files within a directory')
+  .option('--log-main-stdout', '(watcher only) log main thread activity directly to stdout')
+  .option('--log-worker-stdout', '(watcher only) log worker thread activity directly to stdout')
+  .option('--log-polling-stdout', '(watcher only) log polling thread activity directly to stdout')
+  .option('--poll', '(watcher only) force polling mode')
+  .option('--polling-interval <ms>', '(watcher only) milliseconds between polling cycles', parseInt)
+  .option('--polling-throttle <count>', '(watcher only) number of system calls to perform each cycle', parseInt)
+  .option('--debounce <ms>', '(nsfw only) configure debouncing interval', parseInt)
+  .option('-i, --interval <ms>', 'interval to publish resource usage statistics', parseInt)
+  .option('-r, --resource-log <path>', 'log resource usage to a JSON file')
+  .option('-c, --cli <paths,>', 'CLI mode', str => str.split(','))
+  .option('-e, --exercise <exercise>', 'choose an exercise to perform (serial, parallel)', /^(serial|parallel)$/)
+  .option('-r, --root <path>', 'specify a root path for exercises')
   .option('-g, --gen [path]', 'generate a random filesystem structure beneath a path')
-  .option('--watcher-count [count]', 'configure the number of watchers for an exercise (default: 1000)', parseInt)
-  .option('--dir-chance [0..1]', 'chance to generate a new subdirectory (default: 0.05)', parseFloat)
-  .option('--dir-count [count]', 'number of random directories to generate (default: 10)', parseInt)
-  .option('--file-count [count]', 'number of random files to generate (default: 200)', parseInt)
+  .option('--watcher-count <count>', 'configure the number of watchers for an exercise (default: 1000)', parseInt)
+  .option('--dir-chance <0..1>', 'chance to generate a new subdirectory (default: 0.05)', parseFloat)
+  .option('--dir-count <count>', 'number of random directories to generate (default: 10)', parseInt)
+  .option('--file-count <count>', 'number of random files to generate (default: 200)', parseInt)
   .parse(process.argv)
 
 program.interval = program.interval || 10 * 60 * 1000
@@ -50,16 +57,29 @@ if (actionOptions !== 1) {
   program.help()
 }
 
+if (program.gen === true) {
+  if (!program.root) {
+    console.error('--gen requires a path or a --root.')
+    program.help()
+  }
+
+  program.gen = program.root
+}
+
 async function main () {
   try {
     await facade.init({
       loggingDir: program.loggingDir,
+      logMainStdout: program.logMainStdout,
+      logWorkerStdout: program.logWorkerStdout,
+      logPollingStdout: program.logPollingStdout,
       pollingInterval: program.pollingInterval,
       pollingThrottle: program.pollingThrottle
     })
 
     if (program.cli) {
       await cli(program.cli, facade, {
+        root: program.root,
         debounce: program.debounce,
         usageInterval: program.interval,
         poll: program.poll
@@ -72,11 +92,13 @@ async function main () {
       })
     } else if (program.exercise === 'serial') {
       await serialWatchers(facade, {
+        root: program.root,
         poll: program.poll,
         count: program.watcherCount || 1000
       })
     } else if (program.exercise === 'parallel') {
       await parallelWatchers(facade, {
+        root: program.root,
         poll: program.poll,
         count: program.watcherCount || 1000
       })

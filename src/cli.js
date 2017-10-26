@@ -1,11 +1,11 @@
-const fs = require('mz/fs')
+const fs = require('fs-extra')
 
 const {reportError, reportUsage} = require('./helpers')
 
 module.exports = async function (roots, facade, opts) {
   const realRoots = []
   await Promise.all(
-    roots.map(async root => {
+    [...roots, opts.root].map(async root => {
       const realRoot = await fs.realpath(root)
       realRoots.push(realRoot)
 
