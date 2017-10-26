@@ -10,8 +10,9 @@ class Tree {
     this.id = 0
     this.root = opts.root
 
-    this.directories = []
-    this.files = []
+    this.directories = new Set()
+    this.emptyDirectories = new Set()
+    this.files = new Set()
   }
 
   namegen (prefix, suffix = '') {
@@ -20,30 +21,48 @@ class Tree {
     return name
   }
 
+  newDirectoryName () {
+    return path.join(this.randomDirectory(), this.namegen('directory-'))
+  }
+
+  newFileName () {
+    return path.join(this.randomDirectory(), this.namegen('file-', '.txt'))
+  }
+
   getRoot () {
     return this.root
   }
 
   randomDirectory () {
-    return atRandom(this.directories)
+    return atRandom(Array.from(this.directories))
   }
 
   randomFile () {
-    return atRandom(this.files)
+    return atRandom(Array.from(this.files))
   }
 
   async createNewDirectory () {
-    const name = path.join(this.randomDirectory(), this.namegen('directory-'))
+    const name = this.newDirectoryName()
     await fs.mkdir(name, 0o777)
-    this.directories.push(name)
+    this.directories.add(name)
+    this.emptyDirectories.add(name)
     return name
   }
 
   async createNewFile () {
-    const name = path.join(this.randomDirectory(), this.namegen('file-', '.txt'))
+    const name = this.newFileName()
+    this.emptyDirectories.delete(path.dirname(name))
     await fs.writeFile(name, '\n', {encoding: 'utf8'})
-    this.files.push(name)
+    this.files.add(name)
     return name
+  }
+
+  directoryWasDeleted (dirPath) {
+    return this.directories.delete(dirPath)
+  }
+
+  fileWasDeleted (filePath) {
+    return this.files.delete(filePath)
   }
 
   async generate (opts) {
