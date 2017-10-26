@@ -65,7 +65,10 @@ function atRandom (array) {
 
 function reportError (error) {
   console.error('>> ERROR <<'.dangerBanner)
-  console.error((error.stack || error.message).danger)
+  let msg = 'No further information provided.'
+  if (error.stack) msg = error.stack
+  if (typeof error.toString === 'function') msg = error.toString()
+  console.error(msg.danger)
 }
 
 let cpuUsage = null
