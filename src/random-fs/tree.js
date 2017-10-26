@@ -47,7 +47,9 @@ class Tree {
   }
 
   async generate (opts) {
-    if (!this.root) {
+    if (this.root) {
+      await fs.mkdirs(this.root)
+    } else {
       this.root = await tempDir(this.prefix)
     }
 
