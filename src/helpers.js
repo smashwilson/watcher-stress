@@ -1,6 +1,6 @@
 const temp = require('temp').track()
 const humanFormat = require('human-format')
-const fs = require('mz/fs')
+const fs = require('fs-extra')
 
 let nsfw = null
 let CREATED = 'created'

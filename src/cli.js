@@ -1,4 +1,4 @@
-const fs = require('mz/fs')
+const fs = require('fs-extra')
 
 const {reportError, reportUsage} = require('./helpers')
 

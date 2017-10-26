@@ -1,5 +1,5 @@
 const path = require('path')
-const fs = require('mz/fs')
+const fs = require('fs-extra')
 const {atRandom, tempDir} = require('../helpers')
 
 class Tree {

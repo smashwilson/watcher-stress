@@ -1,4 +1,4 @@
-const fs = require('mz/fs')
+const fs = require('fs-extra')
 const {atRandom, reportUsage, reportError} = require('./helpers')
 const {createTree} = require('./random-fs')
 
