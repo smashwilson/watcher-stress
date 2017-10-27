@@ -63,6 +63,19 @@ function atRandom (array) {
   return array[ind]
 }
 
+function chooseProportionally (choices) {
+  const total = choices.reduce((sum, choice) => sum + choice[0], 0)
+  const chosen = Math.floor(Math.random() * total)
+
+  let accumulated = 0
+  for (const [proportion, choice] of choices) {
+    accumulated += proportion
+    if (accumulated > chosen) return choice
+  }
+
+  throw new Error(`Invalid choice ${chosen} from total ${total}`)
+}
+
 function reportError (error) {
   console.error('>> ERROR <<'.dangerBanner)
   let msg = 'No further information provided.'
@@ -114,6 +127,7 @@ module.exports = {
   humanSeconds,
   humanBytes,
   atRandom,
+  chooseProportionally,
   reportError,
   setResourceLogFile,
   reportUsage
