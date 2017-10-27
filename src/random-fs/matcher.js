@@ -68,7 +68,9 @@ class SingleEventMatcher {
     ) {
       this.latencyMs = Date.now() - this.creationTime
 
-      return evt.kind === 'unknown' ? match.SINGLE_UNKNOWN : match.SINGLE_EXACT
+      return evt.kind === 'unknown'
+        ? Match.unknown(evt.action, 1)
+        : Match.exact(evt.action)
     }
 
     return null
@@ -95,27 +97,48 @@ class RenameEventMatcher {
     })
 
     this.pairMatchers = [
-      new SingleEventMatcher({
-        action: 'deleted',
-        kind: spec.kind,
-        path: spec.oldPath
-      }),
-      new SingleEventMatcher({
-        action: 'created',
-        kind: spec.kind,
-        path: spec.path
-      })
+      {
+        match: null,
+        matcher: new SingleEventMatcher({
+          action: 'deleted',
+          kind: spec.kind,
+          path: spec.oldPath
+        })
+      },
+      {
+        match: null,
+        matcher: new SingleEventMatcher({
+          action: 'created',
+          kind: spec.kind,
+          path: spec.path
+        })
+      }
     ]
   }
 
   matches (evt) {
-    if (this.renameMatcher.matches(evt)) {
-      return match.RENAME_EXACT
-    } else if (this.pairMatchers.every(matcher => matcher.hasMatched() || matcher.match(evt))) {
-      return match.RENAME_SPLIT
-    } else {
-      return null
+    const renameM = this.renameMatcher.matches(evt)
+    if (renameM) return renameM
+
+    let exact = 0
+    let unknown = 0
+
+    for (const pair of this.pairMatchers) {
+      if (!pair.match) {
+        pair.match = pair.matcher.match(evt)
+      }
+
+      if (pair.match) {
+        if (pair.match.isExact()) exact++
+        if (pair.match.isUnknown()) unknown++
+      }
     }
+
+    if (exact + unknown === 2) {
+      return Match.split(unknown)
+    }
+
+    return null
   }
 
   getPaths () {
