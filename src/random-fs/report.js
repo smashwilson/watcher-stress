@@ -55,7 +55,7 @@ class Report {
 
       console.log(`${name.header} total: ${t}`)
       for (const key of Object.keys(counters)) {
-        const decamel = key.replace(/([a-z])([A-Z])/, (m, p1, p2) => p1 + ' ' + p2.toLowerCase())
+        const decamel = key.replace(/([a-z])([A-Z])/g, (m, p1, p2) => p1 + ' ' + p2.toLowerCase())
         const percent = t !== 0
           ? Math.floor((counters[key] / t) * 10000) / 100
           : 0
