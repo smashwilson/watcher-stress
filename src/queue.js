@@ -15,9 +15,12 @@ class PromiseQueue {
   }
 
   next () {
-    if (this.running.size >= this.parallelism) return
     if (this.waiting.length === 0) {
       this.becameEmpty()
+      return
+    }
+
+    if (this.running.size >= this.parallelism) {
       return
     }
 
@@ -44,6 +47,10 @@ class PromiseQueue {
   }
 
   whenEmpty () {
+    if (this.waiting.length === 0) {
+      return Promise.resolve()
+    }
+
     return new Promise(resolve => {
       this.becameEmpty = resolve
     })
