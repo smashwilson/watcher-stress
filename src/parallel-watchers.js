@@ -68,7 +68,6 @@ module.exports = async function (facade, opts) {
       tree,
       subscribe: cb => { callbacksByTree.set(tree, cb) },
       iterations: 1000,
-      parallel: 1,
       profile: defaultChurnProfile,
       report
     })))
