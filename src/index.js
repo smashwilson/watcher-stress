@@ -2,6 +2,7 @@
 
 const program = require('commander')
 const colors = require('colors')
+const seedrandom = require('seedrandom')
 
 const cli = require('./cli')
 const {createFacade, available} = require('./facade')
@@ -24,6 +25,7 @@ const watcherRx = new RegExp('^(' + available().join('|') + ')$', 'i')
 program
   .version(require('../package.json').version)
   .option('--use <impl>', `use specified watcher implementation (${watcherNames})`, watcherRx)
+  .option('--seed <seed>', 'seed the PRNG for predictable output')
   .option('--logging-dir <path>', '(watcher only) produce diagnostic logging to files within a directory')
   .option('--log-main-stdout', '(watcher only) log main thread activity directly to stdout')
   .option('--log-worker-stdout', '(watcher only) log worker thread activity directly to stdout')
@@ -65,6 +67,15 @@ if (program.gen === true) {
 
   program.gen = program.root
 }
+
+const decodedSeed = program.seed
+  ? Buffer.from(program.seed, 'base64').toString('utf8')
+  : null
+
+const seed = seedrandom(decodedSeed, {global: true})
+
+const encodedSeed = Buffer.from(seed, 'utf8').toString('base64')
+console.log(`--seed ${encodedSeed}\n\n`.dim)
 
 async function main () {
   try {
