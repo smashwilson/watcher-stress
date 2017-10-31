@@ -1,6 +1,7 @@
 const path = require('path')
 const fs = require('fs-extra')
 const {atRandom, tempDir} = require('../helpers')
+const {fileCreation: FileCreationChange, directoryCreation: DirectoryCreationChange} = require('./changes')
 
 class Tree {
   constructor (opts) {
@@ -79,10 +80,12 @@ class Tree {
 
     while (directoriesRemaining > 0 || filesRemaining > 0) {
       if (directoriesRemaining > 0 && Math.random() < this.directoryChance) {
-        await this.createNewDirectory()
+        const ch = new DirectoryCreationChange(this)
+        await ch.enact()
         directoriesRemaining--
       } else {
-        await this.createNewFile()
+        const ch = new FileCreationChange(this)
+        await ch.enact()
         filesRemaining--
       }
     }
