@@ -1,4 +1,6 @@
 const {Tree} = require('./tree')
+const {churn} = require('./churn')
+const {Report} = require('./report')
 
 exports.createTree = async function (options) {
   const t = new Tree(options)
@@ -7,3 +9,7 @@ exports.createTree = async function (options) {
   }
   return t
 }
+
+exports.churn = churn
+
+exports.Report = Report
