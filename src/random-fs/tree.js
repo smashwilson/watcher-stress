@@ -61,30 +61,38 @@ class Tree {
     return atRandom(potential)
   }
 
+  randomEmptyDirectory () {
+    return atRandom(Array.from(this.emptyDirectories))
   }
 
   randomFile () {
     return atRandom(Array.from(this.files))
   }
 
-  async createNewDirectory () {
-    const name = this.newDirectoryName()
-    await fs.mkdir(name, 0o777)
-    this.directories.add(name)
-    this.emptyDirectories.add(name)
-    return name
+  directoryWillBeAdded (dirPath) {
+    this.emptyDirectories.delete(path.dirname(dirPath))
   }
 
-  async createNewFile () {
-    const name = this.newFileName()
-    this.emptyDirectories.delete(path.dirname(name))
-    await fs.writeFile(name, '\n', {encoding: 'utf8'})
-    this.files.add(name)
-    return name
+  directoryWasAdded (dirPath, empty = true) {
+    this.directories.add(dirPath)
+    if (empty) {
+      this.emptyDirectories.add(dirPath)
+    }
+  }
+
+  fileWillBeAdded (filePath) {
+    this.emptyDirectories.delete(path.dirname(filePath))
+  }
+
+  fileWasAdded (filePath) {
+    this.files.add(filePath)
   }
 
   directoryWasDeleted (dirPath) {
-    return this.directories.delete(dirPath)
+    this.emptyDirectories.delete(dirPath)
+    this.directories.delete(dirPath)
+  }
+
   }
 
   fileWasDeleted (filePath) {
@@ -98,7 +106,7 @@ class Tree {
       this.root = await tempDir(this.prefix)
     }
 
-    this.directories.push(this.root)
+    this.directories.add(this.root)
 
     let directoriesRemaining = opts.directoryCount || 100
     let filesRemaining = opts.fileCount || 1000
