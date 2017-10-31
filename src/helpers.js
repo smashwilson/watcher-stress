@@ -26,7 +26,7 @@ function tempDir (prefix) {
         return
       }
 
-      resolve(dirPath)
+      resolve(fs.realpath(dirPath))
     })
   })
 }
