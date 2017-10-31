@@ -34,8 +34,18 @@ class Tree {
     return this.root
   }
 
-  randomDirectory () {
-    return atRandom(Array.from(this.directories))
+  hasFile () {
+    return this.files.size > 0
+  }
+
+  hasDirectory () {
+    return this.directories.size > 0
+  }
+
+  hasEmptyDirectory () {
+    return this.emptyDirectories.size > 0
+  }
+
   randomDirectory (notWithin = null) {
     if (this.directories.size === 0) console.trace()
     let potential = Array.from(this.directories)
