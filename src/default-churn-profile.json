@@ -1,0 +1,9 @@
+{
+  "fileCreation": { "proportion": 50 },
+  "fileModification": { "proportion": 70 },
+  "fileDeletion": { "proportion": 50 },
+  "fileRename": { "proportion": 10},
+  "directoryCreation": { "proportion": 20 },
+  "directoryDeletion": { "proportion": 20 },
+  "directoryRename": { "proportion": 10 }
+}

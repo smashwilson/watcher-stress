@@ -1,15 +1,18 @@
-const fs = require('fs-extra')
 const path = require('path')
-const {atRandom, reportUsage, reportError} = require('./helpers')
-const {createTree} = require('./random-fs')
+const {reportUsage, reportError} = require('./helpers')
+const {PromiseQueue} = require('./queue')
+const {createTree, churn, Report} = require('./random-fs')
+
+const defaultChurnProfile = require('./default-churn-profile')
 
 module.exports = async function (facade, opts) {
   console.log('>> PARALLEL WATCHER STRESS TEST <<'.banner)
 
   const watcherStartPromises = []
-  const eventCounts = []
   const errors = []
   const trees = []
+  const callbacksByTree = new Map()
+  const queue = new PromiseQueue(5)
 
   function rootNumber (i) {
     if (!opts.root) return null
@@ -37,7 +40,8 @@ module.exports = async function (facade, opts) {
               return
             }
 
-            eventCounts[i] = (eventCounts[i] || 0) + events.length
+            const treeCb = callbacksByTree.get(tree)
+            treeCb && events.forEach(treeCb)
           }
         )
 
@@ -51,19 +55,27 @@ module.exports = async function (facade, opts) {
     })())
   }
 
-  const watchers = (await Promise.all(watcherStartPromises))
-    .filter(watcher => watcher !== null)
+  const watchers = (await Promise.all(watcherStartPromises)).filter(Boolean)
   console.log(`\n>> ${watchers.length} WATCHERS STARTED <<`.banner)
   reportUsage()
 
   // Synthesize some filesystem events
   console.log(`\n>> CREATING FILESYSTEM EVENTS <<`.banner)
-  for (let j = 0; j < 1000; j++) {
-    const someFile = atRandom(trees).randomFile()
-    await fs.appendFile(someFile, `eh ${j}\n`, {encoding: 'utf8'})
-  }
+
+  const report = new Report()
+  await Promise.all(
+    trees.map(tree => queue.enqueue(() => churn({
+      tree,
+      subscribe: cb => { callbacksByTree.set(tree, cb) },
+      iterations: 1000,
+      parallel: 1,
+      profile: defaultChurnProfile,
+      report
+    })))
+  )
 
   await new Promise(resolve => setTimeout(resolve, 1000))
+  reportUsage()
 
   console.log(`\n>> STOPPING WATCHERS <<`.banner)
 
@@ -71,14 +83,10 @@ module.exports = async function (facade, opts) {
   for (let k = 0; k < watchers.length; k++) {
     watcherStopPromises.push((async () => {
       const watcher = watchers[k]
-      const eventCount = eventCounts[k]
       const hadError = errors[k]
       await watcher.stop()
 
       let summary = ''
-      if (eventCount !== undefined) {
-        summary += ` after ${eventCount || 0} events`.sidenote
-      }
       if (hadError) {
         summary += ` with an error`.danger
       }
@@ -93,5 +101,8 @@ module.exports = async function (facade, opts) {
   if (errorCount > 0) {
     console.log(`${errorCount} reported errors`)
   }
+
+  console.log('\n')
+  report.summarize()
   reportUsage()
 }
