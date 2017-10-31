@@ -37,7 +37,6 @@ class FileCreationChange extends Change {
 class FileModificationChange extends Change {
   async enact () {
     this.filePath = this.tree.randomFile()
-    console.log(this.toString())
     await fs.appendFile(this.filePath, 'appended a line\n')
     return new SingleEventMatcher({
       action: 'modified',
@@ -58,7 +57,6 @@ class FileModificationChange extends Change {
 class FileDeletionChange extends Change {
   async enact () {
     this.filePath = this.tree.randomFile()
-    console.log(this.toString())
     this.tree.fileWasDeleted(this.filePath)
     await fs.unlink(this.filePath)
     return new SingleEventMatcher({
@@ -81,7 +79,6 @@ class FileRenameChange extends Change {
   async enact () {
     this.beforePath = this.tree.randomFile()
     this.afterPath = this.tree.newFileName()
-    console.log(this.toString())
     this.tree.fileWasDeleted(this.beforePath)
     this.tree.fileWillBeAdded(this.afterPath)
     await fs.rename(this.beforePath, this.afterPath)
@@ -105,7 +102,6 @@ class FileRenameChange extends Change {
 class DirectoryCreationChange extends Change {
   async enact () {
     this.dirPath = this.tree.newDirectoryName()
-    console.log(this.toString())
     this.tree.directoryWillBeAdded(this.dirPath)
     await fs.mkdir(this.dirPath)
     this.tree.directoryWasAdded(this.dirPath)
@@ -128,7 +124,6 @@ class DirectoryCreationChange extends Change {
 class DirectoryDeletionChange extends Change {
   async enact () {
     this.dirPath = this.tree.randomEmptyDirectory()
-    console.log(this.toString())
     this.tree.directoryWasDeleted(this.dirPath)
     await fs.rmdir(this.dirPath)
     return new SingleEventMatcher({
@@ -151,7 +146,6 @@ class DirectoryRenameChange extends Change {
   async enact () {
     this.beforePath = this.tree.randomDirectory()
     this.afterPath = this.tree.newDirectoryName(this.beforePath)
-    console.log(this.toString())
     await this.tree.directoryWasRenamed(
       this.beforePath,
       () => fs.rename(this.beforePath, this.afterPath),
