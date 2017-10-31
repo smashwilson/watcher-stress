@@ -125,7 +125,7 @@ class RenameEventMatcher {
 
     for (const pair of this.pairMatchers) {
       if (!pair.match) {
-        pair.match = pair.matcher.match(evt)
+        pair.match = pair.matcher.matches(evt)
       }
 
       if (pair.match) {
