@@ -22,8 +22,8 @@ class Tree {
     return name
   }
 
-  newDirectoryName () {
-    return path.join(this.randomDirectory(), this.namegen('directory-'))
+  newDirectoryName (notWithin = null) {
+    return path.join(this.randomDirectory(notWithin), this.namegen('directory-'))
   }
 
   newFileName () {
@@ -36,6 +36,21 @@ class Tree {
 
   randomDirectory () {
     return atRandom(Array.from(this.directories))
+  randomDirectory (notWithin = null) {
+    if (this.directories.size === 0) console.trace()
+    let potential = Array.from(this.directories)
+
+    if (notWithin) {
+      potential = potential.filter(dirPath => !dirPath.startsWith(dirPath))
+
+      if (potential.length === 0) {
+        return path.dirname(notWithin)
+      }
+    }
+
+    return atRandom(potential)
+  }
+
   }
 
   randomFile () {
