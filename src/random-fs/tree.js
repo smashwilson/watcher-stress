@@ -93,6 +93,42 @@ class Tree {
     this.directories.delete(dirPath)
   }
 
+  async directoryWasRenamed (beforePath, op, afterPath) {
+    const beforeWasEmpty = this.emptyDirectories.has(beforePath)
+    this.directoryWasDeleted(beforePath)
+
+    const filesToAdd = new Set()
+    const directoriesToAdd = new Set()
+    const emptyDirectoriesToAdd = new Set()
+
+    for (const existingFile of this.files) {
+      if (existingFile.startsWith(beforePath)) {
+        this.files.delete(existingFile)
+        filesToAdd.add(existingFile.replace(beforePath, afterPath))
+      }
+    }
+
+    for (const existingDir of this.directories) {
+      if (existingDir.startsWith(beforePath)) {
+        this.directories.delete(existingDir)
+        const wasEmpty = this.emptyDirectories.delete(existingDir)
+
+        const renamed = existingDir.replace(beforePath, afterPath)
+
+        directoriesToAdd.add(renamed)
+        if (wasEmpty) {
+          emptyDirectoriesToAdd.add(renamed)
+        }
+      }
+    }
+
+    await op()
+
+    for (const f of filesToAdd) this.files.add(f)
+    for (const d of directoriesToAdd) this.directories.add(d)
+    for (const d of emptyDirectoriesToAdd) this.emptyDirectories.add(d)
+
+    this.directoryWasAdded(afterPath, beforeWasEmpty)
   }
 
   fileWasDeleted (filePath) {
