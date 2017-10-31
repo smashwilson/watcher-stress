@@ -4,9 +4,8 @@ const {chooseProportionally, reportError} = require('../helpers')
 const {Unmatched} = require('./unmatched')
 const changes = require('./changes')
 
-async function churn ({tree, subscribe, iterations, parallel, profile, report}) {
+async function churn ({tree, subscribe, iterations, profile, report}) {
   const unmatched = new Unmatched()
-  const queue = new PromiseQueue(parallel)
 
   const changeChoices = Object.keys(profile).map(change => {
     const ChangeConstructor = changes[change]
@@ -21,39 +20,22 @@ async function churn ({tree, subscribe, iterations, parallel, profile, report}) 
     report.count(match)
   })
 
-  const changePromises = []
-  let changeCount = 0
-  while (changeCount < iterations || queue.waitingCount() > 0) {
+  for (let changeCount = 0; changeCount < iterations; changeCount++) {
     const viable = changeChoices.filter(choice => choice[1].isViable())
-    if (viable.length > 0) {
-      const change = chooseProportionally(viable)
+    const change = chooseProportionally(viable)
 
-      changeCount++
-      changePromises.push(queue.enqueue(async () => {
-        if (!change.isViable()) {
-          process.stdout.write('-'.sidenote)
-          changeCount--
-          return
-        }
-
-        try {
-          const matcher = await change.enact()
-          unmatched.expect(matcher)
-          process.stdout.write('.')
-        } catch (e) {
-          process.stdout.write('X\n')
-          reportError(e)
-        }
-      }, change))
-    }
-
-    if (queue.waitingCount() > parallel) {
-      await queue.whenEmpty()
+    try {
+      const matcher = await change.enact()
+      unmatched.expect(matcher)
+      process.stdout.write('.')
+    } catch (e) {
+      process.stdout.write('\nX'.danger)
+      reportError(e)
       process.stdout.write('\n')
     }
-  }
 
-  await Promise.all(changePromises)
+    if (changeCount % 80 === 79) process.stdout.write('\n')
+  }
 
   return report
 }
