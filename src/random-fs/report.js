@@ -23,7 +23,8 @@ class Report {
       unknown: 0,
       splitExact: 0,
       splitHalfUnknown: 0,
-      splitFullUnknown: 0
+      splitFullUnknown: 0,
+      unexpected: 0
     }
   }
 
