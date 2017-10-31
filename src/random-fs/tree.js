@@ -136,11 +136,11 @@ class Tree {
   }
 
   async generate (opts) {
-    if (this.root) {
-      await fs.mkdirs(this.root)
-    } else {
-      this.root = await tempDir(this.prefix)
+    if (!this.root) {
+      const tmp = await tempDir(this.prefix)
+      this.root = path.join(tmp, 'root')
     }
+    await fs.mkdirs(this.root)
 
     this.directories.add(this.root)
 
