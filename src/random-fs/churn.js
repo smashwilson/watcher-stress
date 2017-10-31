@@ -1,4 +1,3 @@
-const {PromiseQueue} = require('../queue')
 const {chooseProportionally, reportError} = require('../helpers')
 
 const {Unmatched} = require('./unmatched')
@@ -25,8 +24,9 @@ async function churn ({tree, subscribe, iterations, profile, report}) {
     const change = chooseProportionally(viable)
 
     try {
-      const matcher = await change.enact()
-      unmatched.expect(matcher)
+      change.prepare()
+      unmatched.expect(change.matcher())
+      await change.enact()
       process.stdout.write('.')
     } catch (e) {
       process.stdout.write('\nX'.danger)

@@ -150,10 +150,12 @@ class Tree {
     while (directoriesRemaining > 0 || filesRemaining > 0) {
       if (directoriesRemaining > 0 && Math.random() < this.directoryChance) {
         const ch = new DirectoryCreationChange(this)
+        ch.prepare()
         await ch.enact()
         directoriesRemaining--
       } else {
         const ch = new FileCreationChange(this)
+        ch.prepare()
         await ch.enact()
         filesRemaining--
       }

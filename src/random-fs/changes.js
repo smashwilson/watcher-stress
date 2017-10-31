@@ -13,11 +13,15 @@ class Change {
 }
 
 class FileCreationChange extends Change {
-  async enact () {
+  isViable () {
+    return this.tree.hasDirectory()
+  }
+
+  prepare () {
     this.filePath = this.tree.newFileName()
-    this.tree.fileWillBeAdded(this.filePath)
-    await fs.writeFile(this.filePath, 'initial contents\n', {encoding: 'utf8'})
-    this.tree.fileWasAdded(this.filePath)
+  }
+
+  matcher () {
     return new SingleEventMatcher({
       action: 'created',
       kind: 'file',
@@ -25,8 +29,10 @@ class FileCreationChange extends Change {
     })
   }
 
-  isViable () {
-    return this.tree.hasDirectory()
+  async enact () {
+    this.tree.fileWillBeAdded(this.filePath)
+    await fs.writeFile(this.filePath, 'initial contents\n', {encoding: 'utf8'})
+    this.tree.fileWasAdded(this.filePath)
   }
 
   toString () {
@@ -35,9 +41,15 @@ class FileCreationChange extends Change {
 }
 
 class FileModificationChange extends Change {
-  async enact () {
+  isViable () {
+    return this.tree.hasFile()
+  }
+
+  prepare () {
     this.filePath = this.tree.randomFile()
-    await fs.appendFile(this.filePath, 'appended a line\n')
+  }
+
+  matcher () {
     return new SingleEventMatcher({
       action: 'modified',
       kind: 'file',
@@ -45,8 +57,8 @@ class FileModificationChange extends Change {
     })
   }
 
-  isViable () {
-    return this.tree.hasFile()
+  async enact () {
+    await fs.appendFile(this.filePath, 'appended a line\n')
   }
 
   toString () {
@@ -55,10 +67,15 @@ class FileModificationChange extends Change {
 }
 
 class FileDeletionChange extends Change {
-  async enact () {
+  isViable () {
+    return this.tree.hasFile()
+  }
+
+  prepare () {
     this.filePath = this.tree.randomFile()
-    this.tree.fileWasDeleted(this.filePath)
-    await fs.unlink(this.filePath)
+  }
+
+  matcher () {
     return new SingleEventMatcher({
       action: 'deleted',
       kind: 'file',
@@ -66,8 +83,9 @@ class FileDeletionChange extends Change {
     })
   }
 
-  isViable () {
-    return this.tree.hasFile()
+  async enact () {
+    this.tree.fileWasDeleted(this.filePath)
+    await fs.unlink(this.filePath)
   }
 
   toString () {
@@ -76,13 +94,16 @@ class FileDeletionChange extends Change {
 }
 
 class FileRenameChange extends Change {
-  async enact () {
+  isViable () {
+    return this.tree.hasFile() && this.tree.hasDirectory()
+  }
+
+  prepare () {
     this.beforePath = this.tree.randomFile()
     this.afterPath = this.tree.newFileName()
-    this.tree.fileWasDeleted(this.beforePath)
-    this.tree.fileWillBeAdded(this.afterPath)
-    await fs.rename(this.beforePath, this.afterPath)
-    this.tree.fileWasAdded(this.afterPath)
+  }
+
+  matcher () {
     return new RenameEventMatcher({
       kind: 'file',
       oldPath: this.beforePath,
@@ -90,8 +111,11 @@ class FileRenameChange extends Change {
     })
   }
 
-  isViable () {
-    return this.tree.hasFile() && this.tree.hasDirectory()
+  async enact () {
+    this.tree.fileWasDeleted(this.beforePath)
+    this.tree.fileWillBeAdded(this.afterPath)
+    await fs.rename(this.beforePath, this.afterPath)
+    this.tree.fileWasAdded(this.afterPath)
   }
 
   toString () {
@@ -100,11 +124,15 @@ class FileRenameChange extends Change {
 }
 
 class DirectoryCreationChange extends Change {
-  async enact () {
+  isViable () {
+    return this.tree.hasDirectory()
+  }
+
+  prepare () {
     this.dirPath = this.tree.newDirectoryName()
-    this.tree.directoryWillBeAdded(this.dirPath)
-    await fs.mkdir(this.dirPath)
-    this.tree.directoryWasAdded(this.dirPath)
+  }
+
+  matcher () {
     return new SingleEventMatcher({
       action: 'created',
       kind: 'directory',
@@ -112,8 +140,10 @@ class DirectoryCreationChange extends Change {
     })
   }
 
-  isViable () {
-    return this.tree.hasDirectory()
+  async enact () {
+    this.tree.directoryWillBeAdded(this.dirPath)
+    await fs.mkdir(this.dirPath)
+    this.tree.directoryWasAdded(this.dirPath)
   }
 
   toString () {
@@ -122,10 +152,15 @@ class DirectoryCreationChange extends Change {
 }
 
 class DirectoryDeletionChange extends Change {
-  async enact () {
+  isViable () {
+    return this.tree.hasEmptyDirectory()
+  }
+
+  prepare () {
     this.dirPath = this.tree.randomEmptyDirectory()
-    this.tree.directoryWasDeleted(this.dirPath)
-    await fs.rmdir(this.dirPath)
+  }
+
+  matcher () {
     return new SingleEventMatcher({
       action: 'deleted',
       kind: 'directory',
@@ -133,8 +168,9 @@ class DirectoryDeletionChange extends Change {
     })
   }
 
-  isViable () {
-    return this.tree.hasEmptyDirectory()
+  async enact () {
+    this.tree.directoryWasDeleted(this.dirPath)
+    await fs.rmdir(this.dirPath)
   }
 
   toString () {
@@ -143,14 +179,16 @@ class DirectoryDeletionChange extends Change {
 }
 
 class DirectoryRenameChange extends Change {
-  async enact () {
+  isViable () {
+    return this.tree.hasDirectory()
+  }
+
+  prepare () {
     this.beforePath = this.tree.randomDirectory()
     this.afterPath = this.tree.newDirectoryName(this.beforePath)
-    await this.tree.directoryWasRenamed(
-      this.beforePath,
-      () => fs.rename(this.beforePath, this.afterPath),
-      this.afterPath
-    )
+  }
+
+  matcher () {
     return new RenameEventMatcher({
       kind: 'directory',
       oldPath: this.beforePath,
@@ -158,8 +196,12 @@ class DirectoryRenameChange extends Change {
     })
   }
 
-  isViable () {
-    return this.tree.hasDirectory()
+  async enact () {
+    await this.tree.directoryWasRenamed(
+      this.beforePath,
+      () => fs.rename(this.beforePath, this.afterPath),
+      this.afterPath
+    )
   }
 
   toString () {
