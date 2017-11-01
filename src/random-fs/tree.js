@@ -129,6 +129,8 @@ class Tree {
     for (const d of emptyDirectoriesToAdd) this.emptyDirectories.add(d)
 
     this.directoryWasAdded(afterPath, beforeWasEmpty)
+
+    if (beforePath === this.root) this.root = afterPath
   }
 
   fileWasDeleted (filePath) {
