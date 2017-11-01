@@ -1,3 +1,4 @@
+const path = require('path')
 const {reportUsage, reportError} = require('./helpers')
 const {createTree, churn, Report} = require('./random-fs')
 
@@ -41,13 +42,14 @@ async function runWatcher (facade, i, opts, tree, report) {
     }
   )
 
-  console.log('creating 1000 filesystem events\n')
+  console.log(`creating ${opts.churnCount} filesystem events\n`)
   await churn({
     tree,
     subscribe: cb => { receive = cb },
     iterations: opts.churnCount,
     profile: opts.churnProfile,
-    report
+    report,
+    logPath: path.join(opts.loggingDir, 'changes.log')
   })
 
   await watcher.stop()

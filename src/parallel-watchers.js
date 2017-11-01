@@ -17,6 +17,11 @@ module.exports = async function (facade, opts) {
     return path.join(opts.root, `root-${i}`)
   }
 
+  function logNumber (i) {
+    if (!opts.loggingDir) return null
+    return path.join(opts.loggingDir, `change-${i}.log`)
+  }
+
   for (let i = 0; i < opts.count; i++) {
     const tree = await createTree({
       root: rootNumber(i),
@@ -62,12 +67,13 @@ module.exports = async function (facade, opts) {
 
   const report = new Report({loggingDir: opts.loggingDir})
   await Promise.all(
-    trees.map(tree => queue.enqueue(() => churn({
+    trees.map((tree, i) => queue.enqueue(() => churn({
       tree,
       subscribe: cb => { callbacksByTree.set(tree, cb) },
       iterations: opts.churnCount,
       profile: opts.churnProfile,
-      report
+      report,
+      logPath: logNumber(i)
     })))
   )
 
