@@ -40,6 +40,10 @@ class Unmatched {
 
     return Match.unexpected(evt.action)
   }
+
+  allMissed () {
+    return Array.from(this.byPath, ([, matcher]) => matcher.missed())
+  }
 }
 
 module.exports = {Unmatched}
