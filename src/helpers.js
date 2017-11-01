@@ -26,7 +26,7 @@ function tempDir (prefix) {
         return
       }
 
-      resolve(dirPath)
+      resolve(fs.realpath(dirPath))
     })
   })
 }
@@ -42,7 +42,7 @@ function actionName (action) {
   return actionNames.get(action) || `unknown: ${action}`
 }
 
-const timeScale = new humanFormat.Scale({
+const timeScaleS = new humanFormat.Scale({
   seconds: 1,
   minutes: 60,
   hours: 3600,
@@ -51,7 +51,17 @@ const timeScale = new humanFormat.Scale({
 })
 
 function humanSeconds (seconds) {
-  return humanFormat(seconds, {scale: timeScale}) + ` (${seconds}s)`.sidenote
+  return humanFormat(seconds, {scale: timeScaleS}) + ` (${seconds}s)`.sidenote
+}
+
+const timeScaleMs = new humanFormat.Scale({
+  milliseconds: 1,
+  seconds: 1000,
+  minutes: 60000
+})
+
+function humanMilliseconds (milliseconds) {
+  return humanFormat(milliseconds, {scale: timeScaleMs}) + ` (${milliseconds}ms)`.sidenote
 }
 
 function humanBytes (bytes) {
@@ -61,6 +71,19 @@ function humanBytes (bytes) {
 function atRandom (array) {
   const ind = Math.floor(Math.random() * array.length)
   return array[ind]
+}
+
+function chooseProportionally (choices) {
+  const total = choices.reduce((sum, choice) => sum + choice[0], 0)
+  const chosen = Math.floor(Math.random() * total)
+
+  let accumulated = 0
+  for (const [proportion, choice] of choices) {
+    accumulated += proportion
+    if (accumulated > chosen) return choice
+  }
+
+  throw new Error(`Invalid choice ${chosen} from total ${total}`)
 }
 
 function reportError (error) {
@@ -112,8 +135,10 @@ module.exports = {
   tempDir,
   actionName,
   humanSeconds,
+  humanMilliseconds,
   humanBytes,
   atRandom,
+  chooseProportionally,
   reportError,
   setResourceLogFile,
   reportUsage

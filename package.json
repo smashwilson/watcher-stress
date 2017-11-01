@@ -6,7 +6,7 @@
   "scripts": {
     "test": "echo \"Tests? We don't need no stinking tests\" && exit 1",
     "clean": "rimraf build",
-    "build": "npm run clean && babel src --out-dir build --source-maps",
+    "build": "npm run clean && babel src --out-dir build --source-maps --copy-files",
     "start": "npm run build && node build/index.js",
     "prepare": "npm run build"
   },
@@ -23,6 +23,7 @@
     "fs-extra": "^4.0.2",
     "human-format": "^0.8.0",
     "nsfw": "^1.0.15",
+    "seedrandom": "^2.4.3",
     "temp": "^0.8.3"
   },
   "devDependencies": {

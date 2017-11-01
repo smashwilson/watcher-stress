@@ -1,6 +1,7 @@
 const path = require('path')
 const fs = require('fs-extra')
 const {atRandom, tempDir} = require('../helpers')
+const {fileCreation: FileCreationChange, directoryCreation: DirectoryCreationChange} = require('./changes')
 
 class Tree {
   constructor (opts) {
@@ -10,8 +11,9 @@ class Tree {
     this.id = 0
     this.root = opts.root
 
-    this.directories = []
-    this.files = []
+    this.directories = new Set()
+    this.emptyDirectories = new Set()
+    this.files = new Set()
   }
 
   namegen (prefix, suffix = '') {
@@ -20,56 +22,147 @@ class Tree {
     return name
   }
 
+  newDirectoryName (notWithin = null) {
+    return path.join(this.randomDirectory(notWithin), this.namegen('directory-'))
+  }
+
+  newFileName () {
+    return path.join(this.randomDirectory(), this.namegen('file-', '.txt'))
+  }
+
   getRoot () {
     return this.root
   }
 
-  randomDirectory () {
-    return atRandom(this.directories)
+  hasFile () {
+    return this.files.size > 0
+  }
+
+  hasDirectory () {
+    return this.directories.size > 0
+  }
+
+  hasEmptyDirectory () {
+    return this.emptyDirectories.size > 0
+  }
+
+  randomDirectory (notWithin = null) {
+    if (this.directories.size === 0) console.trace()
+    let potential = Array.from(this.directories)
+
+    if (notWithin) {
+      potential = potential.filter(dirPath => !dirPath.startsWith(dirPath))
+
+      if (potential.length === 0) {
+        return path.dirname(notWithin)
+      }
+    }
+
+    return atRandom(potential)
+  }
+
+  randomEmptyDirectory () {
+    return atRandom(Array.from(this.emptyDirectories))
   }
 
   randomFile () {
-    return atRandom(this.files)
+    return atRandom(Array.from(this.files))
   }
 
-  async createNewDirectory () {
-    const name = path.join(this.randomDirectory(), this.namegen('directory-'))
-    await fs.mkdir(name, 0o777)
-    this.directories.push(name)
-    return name
+  directoryWillBeAdded (dirPath) {
+    this.emptyDirectories.delete(path.dirname(dirPath))
   }
 
-  async createNewFile () {
-    const name = path.join(this.randomDirectory(), this.namegen('file-', '.txt'))
-    await fs.writeFile(name, '\n', {encoding: 'utf8'})
-    this.files.push(name)
-    return name
+  directoryWasAdded (dirPath, empty = true) {
+    this.directories.add(dirPath)
+    if (empty) {
+      this.emptyDirectories.add(dirPath)
+    }
+  }
+
+  fileWillBeAdded (filePath) {
+    this.emptyDirectories.delete(path.dirname(filePath))
+  }
+
+  fileWasAdded (filePath) {
+    this.files.add(filePath)
+  }
+
+  directoryWasDeleted (dirPath) {
+    this.emptyDirectories.delete(dirPath)
+    this.directories.delete(dirPath)
+  }
+
+  async directoryWasRenamed (beforePath, op, afterPath) {
+    const beforeWasEmpty = this.emptyDirectories.has(beforePath)
+    this.directoryWasDeleted(beforePath)
+
+    const filesToAdd = new Set()
+    const directoriesToAdd = new Set()
+    const emptyDirectoriesToAdd = new Set()
+
+    for (const existingFile of this.files) {
+      if (existingFile.startsWith(beforePath + '/')) {
+        this.files.delete(existingFile)
+        filesToAdd.add(existingFile.replace(beforePath + '/', afterPath + '/'))
+      }
+    }
+
+    for (const existingDir of this.directories) {
+      if (existingDir.startsWith(beforePath + '/')) {
+        this.directories.delete(existingDir)
+        const wasEmpty = this.emptyDirectories.delete(existingDir)
+
+        const renamed = existingDir.replace(beforePath + '/', afterPath + '/')
+
+        directoriesToAdd.add(renamed)
+        if (wasEmpty) {
+          emptyDirectoriesToAdd.add(renamed)
+        }
+      }
+    }
+
+    await op()
+
+    for (const f of filesToAdd) this.files.add(f)
+    for (const d of directoriesToAdd) this.directories.add(d)
+    for (const d of emptyDirectoriesToAdd) this.emptyDirectories.add(d)
+
+    this.directoryWasAdded(afterPath, beforeWasEmpty)
+
+    if (beforePath === this.root) this.root = afterPath
+  }
+
+  fileWasDeleted (filePath) {
+    return this.files.delete(filePath)
   }
 
   async generate (opts) {
-    if (this.root) {
-      await fs.mkdirs(this.root)
-    } else {
-      this.root = await tempDir(this.prefix)
+    if (!this.root) {
+      const tmp = await tempDir(this.prefix)
+      this.root = path.join(tmp, 'root')
     }
+    await fs.mkdirs(this.root)
 
-    this.directories.push(this.root)
+    this.directories.add(this.root)
 
     let directoriesRemaining = opts.directoryCount || 100
     let filesRemaining = opts.fileCount || 1000
 
     while (directoriesRemaining > 0 || filesRemaining > 0) {
       if (directoriesRemaining > 0 && Math.random() < this.directoryChance) {
-        await this.createNewDirectory()
+        const ch = new DirectoryCreationChange(this)
+        ch.prepare()
+        await ch.enact()
         directoriesRemaining--
       } else {
-        await this.createNewFile()
+        const ch = new FileCreationChange(this)
+        ch.prepare()
+        await ch.enact()
         filesRemaining--
       }
     }
   }
 }
 
-module.exports = {
-  Tree
-}
+module.exports = {Tree}

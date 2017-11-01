@@ -2,6 +2,8 @@
 
 const program = require('commander')
 const colors = require('colors')
+const seedrandom = require('seedrandom')
+const path = require('path')
 
 const cli = require('./cli')
 const {createFacade, available} = require('./facade')
@@ -24,6 +26,7 @@ const watcherRx = new RegExp('^(' + available().join('|') + ')$', 'i')
 program
   .version(require('../package.json').version)
   .option('--use <impl>', `use specified watcher implementation (${watcherNames})`, watcherRx)
+  .option('--seed <seed>', 'seed the PRNG for predictable output')
   .option('--logging-dir <path>', '(watcher only) produce diagnostic logging to files within a directory')
   .option('--log-main-stdout', '(watcher only) log main thread activity directly to stdout')
   .option('--log-worker-stdout', '(watcher only) log worker thread activity directly to stdout')
@@ -39,6 +42,8 @@ program
   .option('-r, --root <path>', 'specify a root path for exercises')
   .option('-g, --gen [path]', 'generate a random filesystem structure beneath a path')
   .option('--watcher-count <count>', 'configure the number of watchers for an exercise (default: 1000)', parseInt)
+  .option('--churn-count <count>', 'number of randomized filesystem events to generate (default: 1000)', parseInt)
+  .option('--churn-profile <path>', 'configure the relative occurrences of kinds of filesystem events')
   .option('--dir-chance <0..1>', 'chance to generate a new subdirectory (default: 0.05)', parseFloat)
   .option('--dir-count <count>', 'number of random directories to generate (default: 10)', parseInt)
   .option('--file-count <count>', 'number of random files to generate (default: 200)', parseInt)
@@ -46,6 +51,10 @@ program
 
 program.interval = program.interval || 10 * 60 * 1000
 setResourceLogFile(program.resourceLog)
+
+program.watcherCount = program.watcherCount || 1000
+program.churnCount = program.churnCount || 1000
+program.churnProfile = program.churnProfile || path.join(__dirname, 'default-churn-profile.json')
 
 // Ensure a backing implementation is specified
 const facade = createFacade(program.use)
@@ -59,12 +68,33 @@ if (actionOptions !== 1) {
 
 if (program.gen === true) {
   if (!program.root) {
-    console.error('--gen requires a path or a --root.')
+    console.error('--gen requires a path or a --root.'.dangerBanner)
     program.help()
   }
 
   program.gen = program.root
 }
+
+// Attempt to load the churn profile
+let churnProfile = null
+if (program.exercise) {
+  try {
+    churnProfile = require(program.churnProfile)
+  } catch (e) {
+    console.error('Unable to load churn profile'.dangerBanner)
+    console.error(e.toString().danger)
+    program.help()
+  }
+}
+
+const decodedSeed = program.seed
+  ? Buffer.from(program.seed, 'base64').toString('utf8')
+  : null
+
+const seed = seedrandom(decodedSeed, {global: true})
+
+const encodedSeed = Buffer.from(seed, 'utf8').toString('base64')
+console.log(`--seed ${encodedSeed}\n\n`.dim)
 
 async function main () {
   try {
@@ -94,13 +124,19 @@ async function main () {
       await serialWatchers(facade, {
         root: program.root,
         poll: program.poll,
-        count: program.watcherCount || 1000
+        count: program.watcherCount || 1000,
+        loggingDir: program.loggingDir,
+        churnCount: program.churnCount,
+        churnProfile
       })
     } else if (program.exercise === 'parallel') {
       await parallelWatchers(facade, {
         root: program.root,
         poll: program.poll,
-        count: program.watcherCount || 1000
+        count: program.watcherCount || 1000,
+        loggingDir: program.loggingDir,
+        churnCount: program.churnCount,
+        churnProfile
       })
     }
 
