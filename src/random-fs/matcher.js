@@ -30,7 +30,8 @@ class Match {
   }
 
   when (callbacks) {
-    callbacks[this.action](this)
+    const fn = callbacks[this.action]
+    if (fn) fn(this)
   }
 
   isExact () {
