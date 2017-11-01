@@ -1,3 +1,5 @@
+const {humanMilliseconds} = require('../helpers')
+
 class Report {
   constructor () {
     this.created = {
@@ -26,6 +28,8 @@ class Report {
       splitFullUnknown: 0,
       unexpected: 0
     }
+
+    this.latencies = []
   }
 
   count (match) {
@@ -44,6 +48,10 @@ class Report {
       deleted: () => increment(this.deleted),
       renamed: () => increment(this.renamed)
     })
+
+    if (!match.isUnexpected()) {
+      this.latencies.push(match.getLatency())
+    }
   }
 
   summarize () {
@@ -69,6 +77,18 @@ class Report {
     for (const key of ['created', 'modified', 'deleted', 'renamed']) {
       section(key, this[key])
     }
+
+    const mean = this.latencies.reduce((sum, ms) => sum + ms) / this.latencies.length
+    this.latencies.sort()
+    const median = this.latencies[Math.ceil(this.latencies.length * 0.5)]
+    const percentile95 = this.latencies[Math.ceil(this.latencies.length * 0.95)]
+    const max = this.latencies[this.latencies.length - 1]
+
+    console.log('\n>> LATENCY <<'.banner)
+    console.log(` - mean: ${humanMilliseconds(mean)}`)
+    console.log(` - median: ${humanMilliseconds(median)}`)
+    console.log(` - 95%: ${humanMilliseconds(percentile95)}`)
+    console.log(` - maximum: ${humanMilliseconds(max)}`)
   }
 }
 
