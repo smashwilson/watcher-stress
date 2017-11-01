@@ -54,7 +54,7 @@ class Report {
       renamed: () => increment(this.renamed)
     })
 
-    if (!match.isUnexpected()) {
+    if (match.measuredLatency()) {
       this.latencies.push(match.getLatency())
     }
   }
