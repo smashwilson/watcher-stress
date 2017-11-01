@@ -57,10 +57,7 @@ function humanSeconds (seconds) {
 const timeScaleMs = new humanFormat.Scale({
   milliseconds: 1,
   seconds: 1000,
-  minutes: 60,
-  hours: 3600,
-  days: 86400,
-  months: 2592000
+  minutes: 60000
 })
 
 function humanMilliseconds (milliseconds) {
