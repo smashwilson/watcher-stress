@@ -3,8 +3,6 @@ const {reportUsage, reportError} = require('./helpers')
 const {PromiseQueue} = require('./queue')
 const {createTree, churn, Report} = require('./random-fs')
 
-const defaultChurnProfile = require('./default-churn-profile')
-
 module.exports = async function (facade, opts) {
   console.log('>> PARALLEL WATCHER STRESS TEST <<'.banner)
 
@@ -67,8 +65,8 @@ module.exports = async function (facade, opts) {
     trees.map(tree => queue.enqueue(() => churn({
       tree,
       subscribe: cb => { callbacksByTree.set(tree, cb) },
-      iterations: 1000,
-      profile: defaultChurnProfile,
+      iterations: opts.churnCount,
+      profile: opts.churnProfile,
       report
     })))
   )

@@ -1,8 +1,6 @@
 const {reportUsage, reportError} = require('./helpers')
 const {createTree, churn, Report} = require('./random-fs')
 
-const defaultChurnProfile = require('./default-churn-profile')
-
 module.exports = async function (facade, opts) {
   console.log('>> SERIAL WATCHER STRESS TEST <<'.banner)
 
@@ -47,8 +45,8 @@ async function runWatcher (facade, i, opts, tree, report) {
   await churn({
     tree,
     subscribe: cb => { receive = cb },
-    iterations: 1000,
-    profile: defaultChurnProfile,
+    iterations: opts.churnCount,
+    profile: opts.churnProfile,
     report
   })
 
