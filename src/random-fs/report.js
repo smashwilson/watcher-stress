@@ -114,11 +114,12 @@ class Report {
       section(key, this[key])
     }
 
+    const lastLatencyInd = this.latencies.length - 1
     const mean = this.latencies.reduce((sum, ms) => sum + ms) / this.latencies.length
     this.latencies.sort()
-    const median = this.latencies[Math.ceil(this.latencies.length * 0.5)]
-    const percentile95 = this.latencies[Math.ceil(this.latencies.length * 0.95)]
-    const max = this.latencies[this.latencies.length - 1]
+    const median = this.latencies[Math.ceil(lastLatencyInd * 0.5)]
+    const percentile95 = this.latencies[Math.ceil(lastLatencyInd * 0.95)]
+    const max = this.latencies[lastLatencyInd]
 
     console.log('\n>> LATENCY <<'.banner)
     console.log(` - mean: ${humanMilliseconds(mean)}`)
