@@ -2,21 +2,26 @@ const EXACT = {exact: true}
 const UNEXPECTED = {unexpected: true}
 
 class Match {
-  static exact (action) { return new Match(action, EXACT) }
+  static exact (latency, action) { return new Match(latency, action, EXACT) }
 
-  static unknown (action, count) { return new Match(action, {unknown: count}) }
+  static unknown (latency, action, count) { return new Match(latency, action, {unknown: count}) }
 
-  static unexpected (action) { return new Match(action, UNEXPECTED) }
+  static unexpected (action) { return new Match(0, action, UNEXPECTED) }
 
-  static split (unknownCount) { return new Match('rename', {split: true, unknown: unknownCount}) }
+  static split (latency, unknownCount) { return new Match(latency, 'rename', {split: true, unknown: unknownCount}) }
 
-  constructor (action, opts) {
+  constructor (latency, action, opts) {
+    this.latency = latency
     this.action = action
     this.opts = opts
   }
 
   getAction () {
     return this.action
+  }
+
+  getLatency () {
+    return this.latency
   }
 
   when (callbacks) {
@@ -56,7 +61,6 @@ class SingleEventMatcher {
     this.oldPath = spec.oldPath
 
     this.creationTime = Date.now()
-    this.latencyMs = null
   }
 
   matches (evt) {
@@ -66,18 +70,14 @@ class SingleEventMatcher {
       (evt.kind === 'unknown' || this.kind === evt.kind) &&
       (this.oldPath === null || this.oldPath === evt.oldPath)
     ) {
-      this.latencyMs = Date.now() - this.creationTime
+      const latency = Date.now() - this.creationTime
 
       return evt.kind === 'unknown'
-        ? Match.unknown(evt.action, 1)
-        : Match.exact(evt.action)
+        ? Match.unknown(latency, evt.action, 1)
+        : Match.exact(latency, evt.action)
     }
 
     return null
-  }
-
-  hasMatched () {
-    return this.latencyMs !== null
   }
 
   getPaths () {
@@ -122,6 +122,7 @@ class RenameEventMatcher {
 
     let exact = 0
     let unknown = 0
+    let latency = 0
 
     for (const pair of this.pairMatchers) {
       if (!pair.match) {
@@ -131,11 +132,13 @@ class RenameEventMatcher {
       if (pair.match) {
         if (pair.match.isExact()) exact++
         if (pair.match.isUnknown()) unknown++
+
+        latency = Math.max(pair.match.getLatency())
       }
     }
 
     if (exact + unknown === 2) {
-      return Match.split(unknown)
+      return Match.split(latency, unknown)
     }
 
     return null
