@@ -1,5 +1,4 @@
 const {chooseProportionally, reportError} = require('../helpers')
-
 const {Unmatched} = require('./unmatched')
 const changes = require('./changes')
 

@@ -1,6 +1,4 @@
 const EXACT = {exact: true}
-const UNEXPECTED = {unexpected: true}
-const MISSED = {missed: true}
 
 class Match {
   static exact (latency, action) { return new Match(latency, action, EXACT) }
@@ -9,9 +7,9 @@ class Match {
 
   static split (latency, unknownCount) { return new Match(latency, 'rename', {split: true, unknown: unknownCount}) }
 
-  static unexpected (action) { return new Match(0, action, UNEXPECTED) }
+  static unexpected (action, evt) { return new Match(0, action, {unexpected: true, event: evt}) }
 
-  static missed (action) { return new Match(0, action, MISSED) }
+  static missed (action, evt) { return new Match(0, action, {missed: true, event: evt}) }
 
   constructor (latency, action, opts) {
     this.latency = latency
@@ -25,6 +23,10 @@ class Match {
 
   getLatency () {
     return this.latency
+  }
+
+  getEvent () {
+    return this.opts.event
   }
 
   when (callbacks) {
@@ -98,7 +100,9 @@ class SingleEventMatcher {
   }
 
   missed () {
-    return Match.missed(this.action)
+    const evt = {action: this.action, kind: this.kind, path: this.path}
+    if (this.oldPath) evt.oldPath = this.oldPath
+    return Match.missed(this.action, evt)
   }
 }
 
@@ -164,7 +168,7 @@ class RenameEventMatcher {
   }
 
   missed () {
-    return Match.missed('renamed')
+    return Match.missed('renamed', this.renameMatcher.missed().getEvent())
   }
 }
 

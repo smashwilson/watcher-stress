@@ -62,7 +62,7 @@ module.exports = async function (facade, opts) {
   // Synthesize some filesystem events
   console.log(`\n>> CREATING FILESYSTEM EVENTS <<`.banner)
 
-  const report = new Report()
+  const report = new Report({loggingDir: opts.loggingDir})
   await Promise.all(
     trees.map(tree => queue.enqueue(() => churn({
       tree,

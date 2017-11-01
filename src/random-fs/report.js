@@ -1,7 +1,10 @@
+const fs = require('fs-extra')
+const path = require('path')
+
 const {humanMilliseconds} = require('../helpers')
 
 class Report {
-  constructor () {
+  constructor (options) {
     this.created = {
       exact: 0,
       unknown: 0,
@@ -34,6 +37,28 @@ class Report {
     }
 
     this.latencies = []
+
+    if (options.loggingDir) {
+      this.unexpectedLog = fs.createWriteStream(path.join(options.loggingDir, 'unexpected.log'))
+      this.missedLog = fs.createWriteStream(path.join(options.loggingDir, 'missed.log'))
+    } else {
+      this.unexpectedLog = null
+      this.missedLog = null
+    }
+  }
+
+  logUnexpected (match) {
+    if (!this.unexpectedLog) return
+
+    this.unexpectedLog.write(JSON.stringify(match.getEvent()))
+    this.unexpectedLog.write('\n')
+  }
+
+  logMissed (match) {
+    if (!this.missedLog) return
+
+    this.missedLog.write(JSON.stringify(match.getEvent()))
+    this.missedLog.write('\n')
   }
 
   count (match) {
@@ -57,9 +82,15 @@ class Report {
     if (match.measuredLatency()) {
       this.latencies.push(match.getLatency())
     }
+
+    if (match.isUnexpected()) this.logUnexpected(match)
+    if (match.isMissed()) this.logMissed(match)
   }
 
   summarize () {
+    if (this.unexpectedLog) this.unexpectedLog.end()
+    if (this.missedLog) this.missedLog.end()
+
     function total (counters) {
       return Object.keys(counters).reduce((sum, key) => sum + counters[key], 0)
     }

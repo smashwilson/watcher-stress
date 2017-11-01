@@ -38,7 +38,7 @@ class Unmatched {
       }
     }
 
-    return Match.unexpected(evt.action)
+    return Match.unexpected(evt.action, evt)
   }
 
   allMissed () {

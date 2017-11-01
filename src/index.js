@@ -105,13 +105,15 @@ async function main () {
       await serialWatchers(facade, {
         root: program.root,
         poll: program.poll,
-        count: program.watcherCount || 1000
+        count: program.watcherCount || 1000,
+        loggingDir: program.loggingDir
       })
     } else if (program.exercise === 'parallel') {
       await parallelWatchers(facade, {
         root: program.root,
         poll: program.poll,
-        count: program.watcherCount || 1000
+        count: program.watcherCount || 1000,
+        loggingDir: program.loggingDir
       })
     }
 
