@@ -1,14 +1,17 @@
 const EXACT = {exact: true}
 const UNEXPECTED = {unexpected: true}
+const MISSED = {missed: true}
 
 class Match {
   static exact (latency, action) { return new Match(latency, action, EXACT) }
 
   static unknown (latency, action, count) { return new Match(latency, action, {unknown: count}) }
 
+  static split (latency, unknownCount) { return new Match(latency, 'rename', {split: true, unknown: unknownCount}) }
+
   static unexpected (action) { return new Match(0, action, UNEXPECTED) }
 
-  static split (latency, unknownCount) { return new Match(latency, 'rename', {split: true, unknown: unknownCount}) }
+  static missed (action) { return new Match(0, action, MISSED) }
 
   constructor (latency, action, opts) {
     this.latency = latency
@@ -40,6 +43,10 @@ class Match {
     return this.opts.unexpected === true
   }
 
+  isMissed () {
+    return this.opts.missed === true
+  }
+
   isSplitExact () {
     return this.opts.split && this.opts.unknownCount === 0
   }
@@ -50,6 +57,10 @@ class Match {
 
   isSplitFullUnknown () {
     return this.opts.split && this.opts.unknownCount === 2
+  }
+
+  measuredLatency () {
+    return !this.isUnexpected() && !this.isMissed()
   }
 }
 
@@ -84,6 +95,10 @@ class SingleEventMatcher {
     const ps = [this.path]
     if (this.oldPath) ps.push(this.oldPath)
     return ps
+  }
+
+  missed () {
+    return Match.missed(this.action)
   }
 }
 
@@ -146,6 +161,10 @@ class RenameEventMatcher {
 
   getPaths () {
     return this.renameMatcher.getPaths()
+  }
+
+  missed () {
+    return Match.missed('renamed')
   }
 }
 
