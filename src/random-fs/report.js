@@ -5,19 +5,22 @@ class Report {
     this.created = {
       exact: 0,
       unknown: 0,
-      unexpected: 0
+      unexpected: 0,
+      missed: 0
     }
 
     this.modified = {
       exact: 0,
       unknown: 0,
-      unexpected: 0
+      unexpected: 0,
+      missed: 0
     }
 
     this.deleted = {
       exact: 0,
       unknown: 0,
-      unexpected: 0
+      unexpected: 0,
+      missed: 0
     }
 
     this.renamed = {
@@ -26,7 +29,8 @@ class Report {
       splitExact: 0,
       splitHalfUnknown: 0,
       splitFullUnknown: 0,
-      unexpected: 0
+      unexpected: 0,
+      missed: 0
     }
 
     this.latencies = []
@@ -37,6 +41,7 @@ class Report {
       if (match.isExact()) counters.exact++
       if (match.isUnknown()) counters.unknown++
       if (match.isUnexpected()) counters.unexpected++
+      if (match.isMissed()) counters.missed++
       if (match.isSplitExact()) counters.splitExact++
       if (match.isSplitHalfUnknown()) counters.splitHalfUnknown++
       if (match.isSplitFullUnknown()) counters.splitFullUnknown++
