@@ -42,7 +42,7 @@ function actionName (action) {
   return actionNames.get(action) || `unknown: ${action}`
 }
 
-const timeScale = new humanFormat.Scale({
+const timeScaleS = new humanFormat.Scale({
   seconds: 1,
   minutes: 60,
   hours: 3600,
@@ -51,7 +51,20 @@ const timeScale = new humanFormat.Scale({
 })
 
 function humanSeconds (seconds) {
-  return humanFormat(seconds, {scale: timeScale}) + ` (${seconds}s)`.sidenote
+  return humanFormat(seconds, {scale: timeScaleS}) + ` (${seconds}s)`.sidenote
+}
+
+const timeScaleMs = new humanFormat.Scale({
+  milliseconds: 1,
+  seconds: 1000,
+  minutes: 60,
+  hours: 3600,
+  days: 86400,
+  months: 2592000
+})
+
+function humanMilliseconds (milliseconds) {
+  return humanFormat(milliseconds, {scale: timeScaleMs}) + ` (${milliseconds}ms)`.sidenote
 }
 
 function humanBytes (bytes) {
@@ -125,6 +138,7 @@ module.exports = {
   tempDir,
   actionName,
   humanSeconds,
+  humanMilliseconds,
   humanBytes,
   atRandom,
   chooseProportionally,
