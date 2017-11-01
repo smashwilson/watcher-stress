@@ -42,7 +42,13 @@ class Unmatched {
   }
 
   allMissed () {
-    return Array.from(this.byPath, ([, matcher]) => matcher.missed())
+    const missed = []
+    for (const [, matchers] of this.byPath) {
+      for (const matcher of matchers) {
+        missed.push(matcher.missed())
+      }
+    }
+    return missed
   }
 }
 

@@ -37,6 +37,10 @@ async function churn ({tree, subscribe, iterations, profile, report}) {
     if (changeCount % 80 === 79) process.stdout.write('\n')
   }
 
+  for (const missed of unmatched.allMissed()) {
+    report.count(missed)
+  }
+
   return report
 }
 
