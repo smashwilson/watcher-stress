@@ -77,7 +77,6 @@ module.exports = async function (facade, opts) {
     })))
   )
 
-  await new Promise(resolve => setTimeout(resolve, 1000))
   reportUsage()
 
   console.log(`\n>> STOPPING WATCHERS <<`.banner)

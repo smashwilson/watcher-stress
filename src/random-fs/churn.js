@@ -48,6 +48,9 @@ async function churn ({tree, subscribe, iterations, profile, report, logPath}) {
     if (changeCount % 80 === 79) process.stdout.write('\n')
   }
 
+  // Pause to allow the final changes a chance to arrive.
+  await new Promise(resolve => setTimeout(resolve, 500))
+
   for (const missed of unmatched.allMissed()) {
     report.count(missed)
   }
