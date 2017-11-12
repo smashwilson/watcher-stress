@@ -51,15 +51,15 @@ class Match {
   }
 
   isSplitExact () {
-    return this.opts.split && this.opts.unknownCount === 0
+    return this.opts.split && this.opts.unknown === 0
   }
 
   isSplitHalfUnknown () {
-    return this.opts.split && this.opts.unknownCount === 1
+    return this.opts.split && this.opts.unknown === 1
   }
 
   isSplitFullUnknown () {
-    return this.opts.split && this.opts.unknownCount === 2
+    return this.opts.split && this.opts.unknown === 2
   }
 
   measuredLatency () {
