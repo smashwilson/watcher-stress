@@ -3,9 +3,10 @@ const fs = require('fs-extra')
 const {reportError, reportUsage} = require('./helpers')
 
 module.exports = async function (roots, facade, opts) {
+  if (opts.root) roots.push(opts.root)
   const realRoots = []
   await Promise.all(
-    [...roots, opts.root].map(async root => {
+    roots.map(async root => {
       const realRoot = await fs.realpath(root)
       realRoots.push(realRoot)
 
