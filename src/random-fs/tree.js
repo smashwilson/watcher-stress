@@ -102,18 +102,18 @@ class Tree {
     const emptyDirectoriesToAdd = new Set()
 
     for (const existingFile of this.files) {
-      if (existingFile.startsWith(beforePath + '/')) {
+      if (existingFile.startsWith(beforePath + path.sep)) {
         this.files.delete(existingFile)
-        filesToAdd.add(existingFile.replace(beforePath + '/', afterPath + '/'))
+        filesToAdd.add(existingFile.replace(beforePath + path.sep, afterPath + path.sep))
       }
     }
 
     for (const existingDir of this.directories) {
-      if (existingDir.startsWith(beforePath + '/')) {
+      if (existingDir.startsWith(beforePath + path.sep)) {
         this.directories.delete(existingDir)
         const wasEmpty = this.emptyDirectories.delete(existingDir)
 
-        const renamed = existingDir.replace(beforePath + '/', afterPath + '/')
+        const renamed = existingDir.replace(beforePath + path.sep, afterPath + path.sep)
 
         directoriesToAdd.add(renamed)
         if (wasEmpty) {
