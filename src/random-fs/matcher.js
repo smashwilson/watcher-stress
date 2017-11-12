@@ -5,7 +5,7 @@ class Match {
 
   static unknown (latency, action, count) { return new Match(latency, action, {unknown: count}) }
 
-  static split (latency, unknownCount) { return new Match(latency, 'rename', {split: true, unknown: unknownCount}) }
+  static split (latency, unknownCount) { return new Match(latency, 'renamed', {split: true, unknown: unknownCount}) }
 
   static unexpected (action, evt) { return new Match(0, action, {unexpected: true, event: evt}) }
 
