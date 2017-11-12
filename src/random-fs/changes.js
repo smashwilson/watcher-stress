@@ -192,7 +192,7 @@ class DirectoryRenameChange extends Change {
     return new RenameEventMatcher({
       kind: 'directory',
       oldPath: this.beforePath,
-      newPath: this.afterPath
+      path: this.afterPath
     })
   }
 
