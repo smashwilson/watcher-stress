@@ -9,6 +9,7 @@ const cli = require('./cli')
 const {createFacade, available} = require('./facade')
 const serialWatchers = require('./serial-watchers')
 const parallelWatchers = require('./parallel-watchers')
+const churn = require('./churn')
 const gen = require('./gen')
 const {setResourceLogFile, reportError} = require('./helpers')
 
@@ -38,7 +39,7 @@ program
   .option('-i, --interval <ms>', 'interval to publish resource usage statistics', parseInt)
   .option('-r, --resource-log <path>', 'log resource usage to a JSON file')
   .option('-c, --cli <paths,>', 'CLI mode', str => str.split(','))
-  .option('-e, --exercise <exercise>', 'choose an exercise to perform (serial, parallel)', /^(serial|parallel)$/)
+  .option('-e, --exercise <exercise>', 'choose an exercise to perform (serial, parallel, churn)', /^(serial|parallel|churn)$/)
   .option('-r, --root <path>', 'specify a root path for exercises')
   .option('-g, --gen [path]', 'generate a random filesystem structure beneath a path')
   .option('--watcher-count <count>', 'configure the number of watchers for an exercise (default: 1000)', parseInt)
@@ -137,6 +138,16 @@ async function main () {
         loggingDir: program.loggingDir,
         churnCount: program.churnCount,
         churnProfile
+      })
+    } else if (program.exercise === 'churn') {
+      await churn(facade, {
+        root: program.root,
+        poll: program.poll,
+        loggingDir: program.loggingDir,
+        churnCount: program.churnCount,
+        churnProfile,
+        dirCount: program.dirCount || 10,
+        fileCount: program.fileCount || 200
       })
     }
 
