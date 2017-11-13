@@ -184,7 +184,7 @@ class DirectoryRenameChange extends Change {
   }
 
   prepare () {
-    this.beforePath = this.tree.randomDirectory()
+    this.beforePath = this.tree.randomDirectory(null, true)
     this.afterPath = this.tree.newDirectoryName(this.beforePath)
   }
 

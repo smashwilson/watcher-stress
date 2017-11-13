@@ -46,7 +46,7 @@ class Tree {
     return this.emptyDirectories.size > 0
   }
 
-  randomDirectory (notWithin = null) {
+  randomDirectory (notWithin = null, notRoot = false) {
     if (this.directories.size === 0) console.trace()
     let potential = Array.from(this.directories)
 
@@ -56,6 +56,10 @@ class Tree {
       if (potential.length === 0) {
         return path.dirname(notWithin)
       }
+    }
+
+    if (notRoot) {
+      potential = potential.filter(dirPath => dirPath !== this.root)
     }
 
     return atRandom(potential)
