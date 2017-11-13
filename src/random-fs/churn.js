@@ -55,7 +55,11 @@ async function churn ({tree, subscribe, iterations, profile, report, logPath}) {
     report.count(missed)
   }
 
-  if (changeLog) changeLog.end()
+  await Promise.all([
+    new Promise(resolve => changeLog ? changeLog.end(resolve) : resolve()),
+    report.finish()
+  ])
+
   return report
 }
 

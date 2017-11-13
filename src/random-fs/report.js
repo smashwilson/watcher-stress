@@ -87,10 +87,14 @@ class Report {
     if (match.isMissed()) this.logMissed(match)
   }
 
-  summarize () {
-    if (this.unexpectedLog) this.unexpectedLog.end()
-    if (this.missedLog) this.missedLog.end()
+  finish () {
+    const endStream = stream => new Promise((resolve) => stream.end(resolve))
+    return Promise.all(
+      [this.unexpectedLog, this.missedLog].filter(Boolean).map(endStream)
+    )
+  }
 
+  summarize () {
     function total (counters) {
       return Object.keys(counters).reduce((sum, key) => sum + counters[key], 0)
     }
