@@ -1,4 +1,5 @@
 const EXACT = {exact: true}
+const PARTIAL = {partial: true}
 
 class Match {
   static exact (latency, action) { return new Match(latency, action, EXACT) }
@@ -10,6 +11,8 @@ class Match {
   static unexpected (action, evt) { return new Match(0, action, {unexpected: true, event: evt}) }
 
   static missed (action, evt) { return new Match(0, action, {missed: true, event: evt}) }
+
+  static partial () { return new Match(0, '', PARTIAL) }
 
   constructor (latency, action, opts) {
     this.latency = latency
@@ -62,8 +65,16 @@ class Match {
     return this.opts.split && this.opts.unknown === 2
   }
 
+  isPartial () {
+    return this.opts.partial === true
+  }
+
   measuredLatency () {
-    return !this.isUnexpected() && !this.isMissed()
+    return !this.isUnexpected() && !this.isMissed() && !this.isPartial()
+  }
+
+  isComplete () {
+    return !this.isPartial()
   }
 }
 
@@ -143,10 +154,13 @@ class RenameEventMatcher {
     let exact = 0
     let unknown = 0
     let latency = 0
+    let justMatched = false
 
     for (const pair of this.pairMatchers) {
       if (!pair.match) {
         pair.match = pair.matcher.matches(evt)
+
+        if (pair.match) justMatched = true
       }
 
       if (pair.match) {
@@ -159,6 +173,10 @@ class RenameEventMatcher {
 
     if (exact + unknown === 2) {
       return Match.split(latency, unknown)
+    }
+
+    if (justMatched) {
+      return Match.partial()
     }
 
     return null

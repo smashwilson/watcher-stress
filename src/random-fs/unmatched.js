@@ -28,10 +28,12 @@ class Unmatched {
     for (const matcher of potential) {
       const m = matcher.matches(evt)
       if (m) {
-        // Remove this node
-        for (const p of matcher.getPaths()) {
-          const ms = this.byPath.get(p)
-          if (ms) ms.delete(matcher)
+        if (m.isComplete()) {
+          // Remove this node
+          for (const p of matcher.getPaths()) {
+            const ms = this.byPath.get(p)
+            if (ms) ms.delete(matcher)
+          }
         }
 
         return m
