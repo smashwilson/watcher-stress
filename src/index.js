@@ -35,6 +35,7 @@ program
   .option('--poll', '(watcher only) force polling mode')
   .option('--polling-interval <ms>', '(watcher only) milliseconds between polling cycles', parseInt)
   .option('--polling-throttle <count>', '(watcher only) number of system calls to perform each cycle', parseInt)
+  .option('--worker-cache <size>', '(watcher, MacOS only) recent stat calls to cache for rename correlation', parseInt)
   .option('--debounce <ms>', '(nsfw only) configure debouncing interval', parseInt)
   .option('-i, --interval <ms>', 'interval to publish resource usage statistics', parseInt)
   .option('-r, --resource-log <path>', 'log resource usage to a JSON file')
@@ -105,7 +106,8 @@ async function main () {
       logWorkerStdout: program.logWorkerStdout,
       logPollingStdout: program.logPollingStdout,
       pollingInterval: program.pollingInterval,
-      pollingThrottle: program.pollingThrottle
+      pollingThrottle: program.pollingThrottle,
+      workerCacheSize: program.workerCache
     })
 
     if (program.cli) {

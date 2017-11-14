@@ -31,6 +31,10 @@ class WatcherFacade {
       opts.workerLog = watcher.STDOUT
     }
 
+    if (options.workerCacheSize) {
+      opts.workerCacheSize = options.workerCacheSize
+    }
+
     if (options.logPollingStdout) {
       opts.pollingLog = watcher.STDOUT
     }
