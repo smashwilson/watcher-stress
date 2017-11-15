@@ -44,10 +44,14 @@ class Unmatched {
   }
 
   allMissed () {
+    const seen = new Set()
     const missed = []
     for (const [, matchers] of this.byPath) {
       for (const matcher of matchers) {
-        missed.push(matcher.missed())
+        if (!seen.has(matcher)) {
+          missed.push(matcher.missed())
+          seen.add(matcher)
+        }
       }
     }
     return missed
