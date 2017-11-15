@@ -88,10 +88,12 @@ class Report {
   }
 
   finish () {
+    const logs = [this.unexpectedLog, this.missedLog]
+    this.unexpectedLog = null
+    this.missedLog = null
+
     const endStream = stream => new Promise((resolve) => stream.end(resolve))
-    return Promise.all(
-      [this.unexpectedLog, this.missedLog].filter(Boolean).map(endStream)
-    )
+    return Promise.all(logs.filter(Boolean).map(endStream))
   }
 
   summarize () {
