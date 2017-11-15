@@ -1,0 +1,64 @@
+#!/usr/bin/env node
+
+const path = require('path')
+const fs = require('fs')
+const readline = require('readline')
+const colors = require('colors')
+
+colors.setTheme({
+  banner: ['green', 'bold'],
+  danger: ['red', 'bold']
+})
+
+function buildRx (basenames) {
+  return new RegExp('(' + basenames.join('|') + ')[^0-9/]')
+}
+
+function fromLogFile (rx, logfile) {
+  return new Promise(resolve => {
+    console.log(`>> ${logfile} <<\n`.banner)
+
+    const fullLog = path.resolve(__dirname, '../logs', `${logfile}.log`)
+    let lineNo = 1
+    let matchNo = 0
+
+    const rl = readline.createInterface({
+      input: fs.createReadStream(fullLog)
+    })
+
+    rl.on('line', line => {
+      if (rx.test(line)) {
+        if (matchNo + 1 !== lineNo) console.log()
+
+        console.log(`${lineNo}: ${line}`)
+        matchNo = lineNo
+      }
+
+      lineNo++
+    })
+
+    rl.on('close', () => {
+      console.log('\n')
+      resolve()
+    })
+  })
+}
+
+async function main (basenames) {
+  const rx = buildRx(basenames)
+  for (const logFile of ['unexpected', 'missed', 'changes', 'main', 'worker']) {
+    await fromLogFile(rx, logFile)
+  }
+}
+
+main(process.argv.slice(2)).then(
+  () => process.exit(0),
+  err => {
+    if (err.stack) {
+      console.error(err.stack.danger)
+    } else {
+      console.error(err.toString().danger)
+    }
+    process.exit(1)
+  }
+)
