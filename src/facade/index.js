@@ -1,5 +1,5 @@
 const facades = new Map(
-  ['./nsfw', './watcher']
+  ['./nsfw', './watcher', './watchman']
     .map(file => require(file))
     .filter(impl => impl.Constructor.isLoaded())
     .map(impl => [impl.name, impl.Constructor])
