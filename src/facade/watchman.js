@@ -37,7 +37,6 @@ class WatcherFacade {
       }
 
       const events = resp.files.map(file => {
-        console.log(require('util').inspect(file, { depth: null }))
         return {
           action: file.exists ? 'modified' : 'deleted',
           kind: TYPES.get(file.type) || 'unknown',
