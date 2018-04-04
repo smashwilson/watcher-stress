@@ -1,6 +1,6 @@
 {
   "name": "@smashwilson/watcher-stress",
-  "version": "1.0.10",
+  "version": "1.0.11",
   "description": "Stress-test filesystem watchers",
   "main": "index.js",
   "scripts": {
